@@ -46,19 +46,16 @@
     let i = 0;
 
     setInterval(() => {
-      // 1. ضيف كلاس الاختفاء
       tagEl.classList.add('hide');
 
-      // 2. استنى مدة الانميشن (500ms) وبعدين غير النص واظهر تاني
       setTimeout(() => {
         i = (i + 1) % taglines.length;
         tagEl.textContent = taglines[i];
         
-        // 3. شيل كلاس الاختفاء عشان يظهر بالانميشن
         tagEl.classList.remove('hide');
       }, 500); 
 
-    }, 4000); // الوقت الكلي بين الجمل
+    }, 4000);
   </script>
 </body>
 </html>
