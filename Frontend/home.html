@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home — EgyCinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="header-slot"></div>
+  <main style="flex:1">
+    <section class="featured" id="featured"></section>
+    <section id="cinemas" class="cinemas-section">
+      <div class="container">
+        <div class="intro">
+          <div class="eyebrow">Cinemas across Egypt</div>
+          <h2>Pick your screen, pick your story</h2>
+        </div>
+        <div id="cinemaList"></div>
+      </div>
+    </section>
+  </main>
+  <div id="footer-slot"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    mountChrome();
+
+    // Featured (first movie)
+    const f = MOVIES[0];
+    document.getElementById('featured').innerHTML = `
+      <img src="${f.backdrop || f.poster}" alt="${f.title}" />
+      <div class="container">
+        <div class="eyebrow">Featured</div>
+        <h1>${f.title}</h1>
+        <p>${f.description}</p>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+          <a class="btn btn-hero btn-lg" href="movie.html?id=${f.id}"><span class="icon">${ICONS.play}</span> Watch details</a>
+          ${favButtonHTML(f.id, {size:'lg'})}
+        </div>
+      </div>`;
+
+    // Cinema rows with showtimes + booking
+    // Cinema rows with showtimes + booking
+    const list = document.getElementById('cinemaList');
+    list.innerHTML = CINEMAS.map(c => `
+      <div class="cinema-row">
+        <div class="head">
+          <div>
+            <h2>${c.name}</h2>
+            <div class="loc"><span class="icon">${ICONS.pin}</span>${c.location}</div>
+          </div>
+          <div class="divider"></div>
+        </div>
+        <div class="movie-grid">
+          ${c.movieIds.map(id => {
+            const m = getMovie(id); if(!m) return '';
+            const shows = getShowtimes(m.id, c.id);
+            return `
+              <div class="movie-card movie-card-grid">
+                <a href="movie.html?id=${m.id}" class="poster-link">
+                  <div class="poster">
+                    <span class="rating">${m.rating}</span>
+                    ${favButtonHTML(m.id)}
+                    <img src="${m.poster}" alt="${m.title} poster" loading="lazy" />
+                  </div>
+                  <h3>${m.title}</h3>
+                  <div class="movie-meta">
+                    <span>${ICONS.clock}${m.duration}</span>
+                    <span><span class="star">${ICONS.star}</span>${m.year}</span>
+                  </div>
+                </a>
+                <div class="showtimes">
+  ${shows.map(d => `
+    <div class="show-day">
+      <div class="show-date">
+        <span class="icon">${ICONS.cal}</span>${d.label}
+      </div>
+      <div class="show-times">
+        ${d.times.map(t => `
+          <button type="button" class="time-chip"
+            onclick="bookTicket('${m.id}', '${c.id}', ${JSON.stringify(d.label)}, '${t}')">
+            ${t}
+          </button>`).join('')}
+      </div>
+    </div>`).join('')}
+</div>
+                <button type="button" class="btn btn-hero btn-sm book-btn"
+                  onclick="bookTicket('${m.id}', '${c.id}', 'Today', '${shows[0].times[0]}')">
+                  <span class="icon">${ICONS.ticket}</span> Book ticket
+                </button>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`).join('');
+  </script>
+</body>
+</html>

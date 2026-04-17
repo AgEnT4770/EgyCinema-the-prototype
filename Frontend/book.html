@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Tickets — EgyCinema</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="header-slot"></div>
+<main id="root"></main>
+<div id="footer-slot"></div>
+
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script>
+    // 1. تشغيل الهيدر والفوتر
+    mountChrome();
+
+    // 2. سحب البيانات من الرابط (URL)
+    const p = new URLSearchParams(location.search);
+    const movie = getMovie(p.get('movie'));
+    const cinema = getCinema(p.get('cinema'));
+    const date = p.get('date');
+    const time = p.get('time');
+
+    // 3. الإعدادات الأساسية
+    const PRICE = 120;
+    const ROWS = ['A','B','C','D','E','F','G','H'];
+    const COLS = 10;
+    const root = document.getElementById('root');
+
+    // وظيفة وهمية للأماكن المحجوزة (عشان الكود ميتعطلش)
+    const isSeatOccupied = (mId, cId, d, t, r, c) => ( (r + c) % 7 === 0);
+
+    // 4. التحقق من وجود البيانات
+    if(!movie || !cinema || !date || !time){
+        root.innerHTML = `
+        <div class="container" style="padding:80px 0;text-align:center">
+            <h1 class="font-display" style="font-size:28px;margin-bottom:16px">Booking not found</h1>
+            <p>We couldn't find the movie or cinema details.</p>
+            <a href="home.html" class="btn btn-hero" style="margin-top:20px">Back to home</a>
+        </div>`;
+    } else {
+        const selected = new Set();
+
+        // بناء خريطة الكراسي
+        function buildSeats(){
+            let html = '';
+            ROWS.forEach((row, ri) => {
+                html += `<div class="seat-row"><span class="row-label">${row}</span><div class="seats">`;
+                for(let c=0; c<COLS; c++){
+                    const id = `${row}${c+1}`;
+                    const occ = isSeatOccupied(movie.id, cinema.id, date, time, ri, c);
+                    const cls = ['seat'];
+                    if(c===4) cls.push('aisle');
+                    if(occ) cls.push('occupied');
+                    html += `<button class="${cls.join(' ')}" data-seat="${id}" ${occ?'disabled':''}>${c+1}</button>`;
+                }
+                html += `</div></div>`;
+            });
+            return html;
+        }
+
+        function updateSummary(){
+            const seats = [...selected].sort();
+            document.getElementById('seatList').textContent = seats.length ? seats.join(', ') : '—';
+            document.getElementById('totalVal').textContent = (seats.length * PRICE) + ' EGP';
+        }
+
+        // حقن الـ HTML في الصفحة
+        root.innerHTML = `
+        <div class="container" style="padding-top:24px; padding-bottom:40px">
+            <a href="home.html" class="back-link" style="display:flex; align-items:center; gap:8px; margin-bottom:20px; color:var(--gold); text-decoration:none">
+                ${ICONS.back} <span>Back to Movies</span>
+            </a>
+            <div class="booking-grid">
+                <div>
+                    <div class="uppercase-spaced" style="color:var(--gold); letter-spacing:2px; font-size:12px">${cinema.name}</div>
+                    <h1 class="font-display" style="font-size:clamp(28px,4vw,42px); font-weight:900; margin:8px 0">${movie.title}</h1>
+                    
+                    <div class="meta-row" style="display:flex; flex-wrap:wrap; gap:20px; color:gray; font-size:14px; margin-bottom:30px">
+                        <span><span class="icon-sm">${ICONS.pin}</span> ${cinema.location}</span>
+                        <span><span class="icon-sm">${ICONS.cal}</span> ${date}</span>
+                        <span><span class="icon-sm">${ICONS.clock}</span> ${time}</span>
+                    </div>
+
+                    <div class="screen"></div>
+                    <div class="screen-label" style="text-align:center; color:gray; font-size:12px; margin-bottom:30px; text-transform:uppercase">Screen</div>
+                    
+                    <div class="seat-map" id="seatMap">${buildSeats()}</div>
+                    
+                    <div class="legend" style="display:flex; justify-content:center; gap:20px; margin-top:30px; font-size:13px">
+                        <span><span class="swatch"></span> Available</span>
+                        <span><span class="swatch sel" style="background:var(--gold)"></span> Selected</span>
+                        <span><span class="swatch taken" style="background:#333"></span> Taken</span>
+                    </div>
+                </div>
+
+                <aside class="summary" style="background:#111; padding:24px; border-radius:12px; border:1px solid #222">
+                    <div class="top" style="display:flex; gap:16px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid #222">
+                        <img src="${movie.poster}" style="width:80px; border-radius:8px">
+                        <div>
+                            <h4 style="margin:0 0 4px 0">${movie.title}</h4>
+                            <p style="font-size:12px; color:gray; margin:0">${movie.genre}</p>
+                            <p style="font-size:12px; color:var(--gold); margin:4px 0 0 0">${movie.duration}</p>
+                        </div>
+                    </div>
+                    <div class="lines" style="display:flex; flex-direction:column; gap:12px; font-size:14px">
+                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Cinema</span><span>${cinema.name}</span></div>
+                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Date</span><span>${date}</span></div>
+                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Time</span><span>${time}</span></div>
+                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Seats</span><span id="seatList" style="color:var(--gold)">—</span></div>
+                        <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #222; font-weight:bold">
+                            <span>Total</span><span id="totalVal" style="color:var(--gold); font-size:18px">0 EGP</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-hero btn-block" id="confirmBtn" style="width:100%; margin-top:24px; padding:14px">
+                        Confirm Booking
+                    </button>
+                </aside>
+            </div>
+        </div>`;
+
+        // إضافة الـ Event Listeners بعد حقن الـ HTML
+        document.getElementById('seatMap').addEventListener('click', e => {
+            const b = e.target.closest('[data-seat]');
+            if(!b || b.disabled) return;
+            const id = b.getAttribute('data-seat');
+            if(selected.has(id)){
+                selected.delete(id);
+                b.classList.remove('selected');
+            } else {
+                selected.add(id);
+                b.classList.add('selected');
+            }
+            updateSummary();
+        });
+
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            if(selected.size === 0){
+                toast('Please select at least one seat', 'error');
+                return;
+            }
+            toast(`Success! ${selected.size} seats booked for ${movie.title}`);
+            setTimeout(() => location.href = 'home.html', 1500);
+        });
+    }
+</script>
+</body>
+</html>

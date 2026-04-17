@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EgyCinema — Egypt's Premier Movie Experience</title>
+  <meta name="description" content="Discover and book the latest movies playing across Egypt's top cinemas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="cinema-bg">
+    <main class="welcome-main">
+      <div class="chip fade-in"><span class="icon"></span> Now showing across Egypt</div>
+      <h1 class="welcome-title fade-in">Egy<span class="text-gradient-gold">Cinema</span></h1>
+      <p id="tagline" class="welcome-tag fade-in-slow">Where every story comes alive.</p>
+      <div class="welcome-actions fade-in" style="animation-delay:.2s">
+        <a href="signup.html" class="btn btn-hero btn-xl">Get Started <span class="icon" id="arrowIcon"></span></a>
+        <a href="login.html" class="btn btn-outline btn-xl">I already have an account</a>
+      </div>
+      <div class="welcome-stats fade-in" style="animation-delay:.4s">
+        <div><div class="stat-n">10+</div><div class="stat-l">Cinemas</div></div>
+        <div><div class="stat-n">200+</div><div class="stat-l">Movies</div></div>
+        <div><div class="stat-n">1M+</div><div class="stat-l">Happy viewers</div></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    // Inject icons
+    document.querySelector('.chip .icon').innerHTML = ICONS.sparkles;
+    document.getElementById('arrowIcon').innerHTML = ICONS.arrow;
+
+    // Rotating tagline
+    const taglines = [
+      "Where every story comes alive.",
+      "Egypt's biggest screens, one ticket away.",
+      "From Cairo to Alexandria — every story, every seat.",
+      "Book your seat. Live the moment.",
+    ];
+    
+    const tagEl = document.getElementById('tagline');
+    let i = 0;
+
+    setInterval(() => {
+      // 1. ضيف كلاس الاختفاء
+      tagEl.classList.add('hide');
+
+      // 2. استنى مدة الانميشن (500ms) وبعدين غير النص واظهر تاني
+      setTimeout(() => {
+        i = (i + 1) % taglines.length;
+        tagEl.textContent = taglines[i];
+        
+        // 3. شيل كلاس الاختفاء عشان يظهر بالانميشن
+        tagEl.classList.remove('hide');
+      }, 500); 
+
+    }, 4000); // الوقت الكلي بين الجمل
+  </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Movie — EgyCinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="header-slot"></div>
+  <main style="flex:1" id="detailRoot"></main>
+  <div id="footer-slot"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    mountChrome();
+    const id = new URLSearchParams(location.search).get('id');
+    const m = getMovie(id);
+    const root = document.getElementById('detailRoot');
+    if(!m){
+      root.innerHTML = `
+        <div class="container" style="padding:5rem 1.5rem;text-align:center">
+          <h1 style="font-size:2rem;margin-bottom:.5rem">Movie not found</h1>
+          <a href="home.html" class="btn btn-hero" style="margin-top:1rem">Back to home</a>
+        </div>`;
+    } else {
+      document.title = `${m.title} — EgyCinema`;
+      const showing = getCinemasForMovie(m.id);
+      root.innerHTML = `
+        <section class="detail-hero">
+          <div class="bg"><img src="${m.backdrop || m.poster}" alt="" /></div>
+          <div class="container">
+            <a href="home.html" class="back-link"><span class="icon">${ICONS.back}</span> Back</a>
+            <div class="detail-grid">
+              <img class="detail-poster scale-in" src="${m.poster}" alt="${m.title} poster" />
+              <div class="detail-info fade-in">
+                <div class="eyebrow">${m.genre}</div>
+                <h1>${m.title}</h1>
+                <div class="detail-meta">
+                  <span>${ICONS.clock}${m.duration}</span>
+                  <span>${ICONS.cal}${m.year}</span>
+                  <span><span class="star">${ICONS.star}</span>${m.rating}</span>
+                </div>
+                <p class="desc">${m.description}</p>
+                <div style="margin-top:1.25rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+                  ${favButtonHTML(m.id, {size:'lg'})}
+                  <span class="text-muted" style="font-size:.85rem">Add to your favorites</span>
+                </div>
+                <div class="showing">
+                  <h3>Now showing at</h3>
+                  <div class="showing-grid">
+                    ${showing.map(c => {
+                      const shows = getShowtimes(m.id, c.id);
+                      return `
+                        <div class="showing-card">
+                          <div class="name">${c.name}</div>
+                          <div class="where"><span class="icon">${ICONS.pin}</span>${c.location}</div>
+                          <div class="showtimes" style="margin-top:.75rem">
+                            ${shows.map(d => `
+                              <div class="show-day">
+                                <div class="show-date"><span class="icon">${ICONS.cal}</span>${d.label}</div>
+                                <div class="show-times">
+                                  ${d.times.map(t => `
+                                    <button type="button" class="time-chip"
+                                      onclick="bookTicket('${m.id}', '${c.id}', ${JSON.stringify(d.label)}, '${t}')">
+                                      ${t}
+                                    </button>`).join('')}
+                                </div>
+                              </div>`).join('')}
+                          </div>
+                          
+                          <button type="button" class="btn btn-hero btn-sm" style="margin-top:.75rem;width:100%"
+                            onclick="bookTicket('${m.id}', '${c.id}', '${shows[0].label}', '${shows[0].times[0]}')">
+                            <span class="icon">${ICONS.ticket}</span> Book ticket
+                          </button>
+                        </div>`;
+                    }).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>`;
+    }
+  </script>
+</body>
+</html>
