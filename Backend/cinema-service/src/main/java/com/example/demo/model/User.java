@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package com.example.demo.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,8 +22,8 @@ public class User {
     @Column(nullable = false) //Password must not be empty or null
     private String passwordHash; //Stores the hashed password from UserAuth
     @Column(nullable = false) //Salt must not be empty or null
-    private byte[] salt; //Stores the salt used for hashing the password
+    private String salt; //Stores the B64-encoded salt used for hashing the password
     @Column(nullable = false) //Role must not be empty or null
     private String role; //Stores the user role 
-    
+
 }

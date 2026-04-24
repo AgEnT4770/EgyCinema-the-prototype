@@ -7,9 +7,11 @@ import java.security.SecureRandom;
 
 public class UserAuth {
 
+    private static final String PEPPER = "MySpiciestOfPeppers!"; //My secret ingredient
+
     public static byte[] passSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
+        SecureRandom random = new SecureRandom(); //Creates a secure random number generator for generating salts
+        byte[] salt = new byte[16]; //Generates a 16-byte salt for hashing
         random.nextBytes(salt);//Generates a random salt using a secure random number generator
         return salt;
     }
@@ -17,7 +19,7 @@ public class UserAuth {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(salt); //Adds salt to hash first
-            byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8)); //Hashes the password using SHA-256
+            byte[] hashedBytes = md.digest((password + PEPPER).getBytes(StandardCharsets.UTF_8)); //Hashes the password using SHA-256 and adds some spice
             StringBuilder sb = new StringBuilder(); //Takes the salted hash and convert into hex string
             for (byte b : hashedBytes) {
                 sb.append(String.format("%02x", b));//Formats each byte as a two-digit hexadecimal string
