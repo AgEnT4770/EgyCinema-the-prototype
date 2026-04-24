@@ -15,7 +15,7 @@ public class JwtAuth {
     private final SecretKey key = Jwts.SIG.HS256.key().build(); // Generate a secure random key for signing JWTs
     
     public String generateToken(String username) {
-        return Jwts.builder() 
+        return Jwts.builder() // Create a new JWT token builder
                 .subject(username) // Set the username as the subject of the token
                 .claim("roles", "USER") // Add specific user role as claim in the token
                 .issuedAt(new Date()) // Set the token issuance time
