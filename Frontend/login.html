@@ -22,8 +22,8 @@
           <p class="sub">Log in to continue your cinema journey.</p>
           <form id="loginForm" novalidate>
             <div class="field">
-              <label for="email">Email</label>
-              <input id="email" type="email" autocomplete="email" required />
+              <label for="username">Username</label>
+              <input id="username" type="text" autocomplete="username" required />
             </div>
             <div class="field">
               <label for="password">Password</label>
@@ -39,13 +39,13 @@
   <script src="js/common.js"></script>
   <script>
     document.querySelector('.auth-brand .brand-mark').innerHTML = ICONS.film;
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      if(!/^\S+@\S+\.\S+$/.test(email)) return toast('Enter a valid email','error');
+      if(!username || username.length < 3) return toast('Username must be at least 3 characters','error');
       if(password.length < 6) return toast('Password must be at least 6 characters','error');
-      try { Auth.login(email, password); toast('Welcome back!'); setTimeout(()=>location.href='home.html', 500); }
+      try { await Auth.login(username, password); toast('Welcome back!'); setTimeout(()=>location.href='home.html', 500); }
       catch(err){ toast(err.message, 'error'); }
     });
   </script>

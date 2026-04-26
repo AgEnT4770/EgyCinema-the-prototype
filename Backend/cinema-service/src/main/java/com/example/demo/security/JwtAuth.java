@@ -14,10 +14,10 @@ public class JwtAuth {
     private static final long EXPIRATION_TIME = 86400000; // Expires in 24 hours
     private final SecretKey key = Jwts.SIG.HS256.key().build(); // Generate a secure random key for signing JWTs
     
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         return Jwts.builder() // Create a new JWT token builder
                 .subject(username) // Set the username as the subject of the token
-                .claim("roles", "USER") // Add specific user role as claim in the token
+                .claim("roles", role) // Add specific user role as claim in the token
                 .issuedAt(new Date()) // Set the token issuance time
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // Set expiration for the token
                 .signWith(key) // Sign the token with the generated key

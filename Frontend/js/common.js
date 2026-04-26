@@ -22,25 +22,38 @@ const ICONS = {
 const AUTH_KEY = 'egycinema:user';
 const Auth = {
   current(){ try { return JSON.parse(localStorage.getItem(AUTH_KEY)); } catch { return null; } },
-  signup(email, password){
-    const users = JSON.parse(localStorage.getItem('egycinema:users') || '{}');
-    if(users[email]) throw new Error('That email is already registered. Try logging in.');
-    users[email] = password;
-    localStorage.setItem('egycinema:users', JSON.stringify(users));
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ email }));
+  
+  async signup(username, password){
+    const res = await fetch('http://localhost:8080/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg);
+    }
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
   },
-  login(email, password){
-    const users = JSON.parse(localStorage.getItem('egycinema:users') || '{}');
-    if(!users[email] || users[email] !== password) throw new Error('Wrong email or password.');
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ email }));
+
+  async login(username, password){
+    const res = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    if (!res.ok) throw new Error('Invalid credentials');
+    const token = await res.text();
+    sessionStorage.setItem('token', token);
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
   },
+
   logout(){ localStorage.removeItem(AUTH_KEY); },
 };
-
 // --- Favorites (per user, fallback to guest) ---
 function favKey(){
   const u = Auth.current();
-  return 'egycinema:favs:' + (u ? u.email : 'guest');
+  return 'egycinema:favs:' + (u ? (u.username || 'guest') : 'guest');
 }
 const Favs = {
   all(){ try { return JSON.parse(localStorage.getItem(favKey())) || []; } catch { return []; } },
@@ -161,7 +174,7 @@ function renderHeader(){
       </nav>
       <div class="header-actions">
         ${u ? `
-          <div class="user-email"><span class="text-gold icon">${ICONS.user}</span><span>${u.email}</span></div>
+          <div class="user-email"><span class="text-gold icon">${ICONS.user}</span><span>${u.username}</span></div>
           <button class="btn btn-ghost btn-sm" id="logoutBtn" aria-label="Sign out"><span class="icon">${ICONS.logout}</span></button>
         ` : `
           <a class="btn btn-ghost btn-sm" href="login.html">Login</a>
