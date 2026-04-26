@@ -39,7 +39,7 @@ public class AuthService {
     public String loginUser(String username, String password) {
         return userRepository.findByUsername(username) //Finds the user by their username
                 .filter(user -> UserAuth.verifyPassword(password, Base64.getDecoder().decode(user.getSalt()), user.getPasswordHash())) //Verifies the provided password against the stored hash and salt
-                .map(user -> jwtAuth.generateToken(username)) //If authentication is successful, generates a JWT token for the user
+                .map(user -> jwtAuth.generateToken(username, user.getRole())) //If authentication is successful, generates a JWT token for the user
                 .orElse(null); //If authentication fails, returns null
     }
 }
