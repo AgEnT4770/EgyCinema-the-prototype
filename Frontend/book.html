@@ -133,8 +133,15 @@
                 toast('Please select at least one seat', 'error');
                 return;
             }
-            toast(`Success! ${selected.size} seats booked for ${movie.title}`);
-            setTimeout(() => location.href = 'home.html', 1500);
+            const seats = [...selected].sort().join(',');
+            const total = selected.size * PRICE;
+            const params = new URLSearchParams({
+                movie: movie.id,
+                cinema: cinema.id,
+                date, time, seats,
+                total: String(total)
+            });
+            location.href = 'payment.html?' + params.toString();
         });
     }
 </script>

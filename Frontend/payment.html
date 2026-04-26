@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment — EgyCinema</title>
+<link rel="stylesheet" href="css/styles.css">
+
+</head>
+<body>
+<div id="header-slot"></div>
+<main id="root"></main>
+<div id="footer-slot"></div>
+
+<script src="js/data.js"></script>
+<script src="js/common.js"></script>
+<script>
+  mountChrome();
+
+  const p = new URLSearchParams(location.search);
+  const movie = getMovie(p.get('movie'));
+  const cinema = getCinema(p.get('cinema'));
+  const date = p.get('date');
+  const time = p.get('time');
+  const seats = (p.get('seats') || '').split(',').filter(Boolean);
+  const total = parseInt(p.get('total') || '0', 10);
+
+  const root = document.getElementById('root');
+
+  if(!movie || !cinema || !seats.length){
+    root.innerHTML = `
+      <div class="container" style="padding:80px 0;text-align:center">
+        <h1 class="font-display" style="font-size:28px;margin-bottom:16px">Payment session expired</h1>
+        <p style="color:gray">Please start your booking again.</p>
+        <a href="home.html" class="btn btn-hero" style="margin-top:20px">Back to home</a>
+      </div>`;
+  } else {
+    root.innerHTML = `
+      <div class="container" style="padding-top:24px;padding-bottom:60px">
+        <a href="javascript:history.back()" class="back-link" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;color:var(--gold);text-decoration:none">
+          ${ICONS.back} <span>Back to seat selection</span>
+        </a>
+
+        <div style="margin-bottom:30px">
+          <div class="uppercase-spaced" style="color:var(--gold);letter-spacing:2px;font-size:12px">Checkout</div>
+          <h1 class="font-display" style="font-size:clamp(28px,4vw,42px);font-weight:900;margin:8px 0">Payment</h1>
+          <p style="color:gray;margin:0">Choose how you'd like to pay for your tickets.</p>
+        </div>
+
+        <div class="pay-grid">
+          <div class="pay-card">
+            <h2>Select payment method</h2>
+            <div class="methods" id="methods">
+              <div class="method active" data-method="card"><span class="ic">💳</span><span>Credit / Debit Card</span></div>
+              <div class="method" data-method="vodafone"><span class="ic">📱</span><span>Vodafone Cash</span></div>
+              <div class="method" data-method="instapay"><span class="ic">⚡</span><span>InstaPay</span></div>
+              <div class="method" data-method="fawry"><span class="ic">🏪</span><span>Fawry</span></div>
+              <div class="method" data-method="paypal"><span class="ic">🅿️</span><span>PayPal</span></div>
+              <div class="method" data-method="cash"><span class="ic">💵</span><span>Pay at Cinema</span></div>
+            </div>
+
+            <!-- Card -->
+            <div class="pane active" data-pane="card">
+              <div class="field">
+                <label>Cardholder name</label>
+                <input type="text" placeholder="Name on card" id="ccName">
+              </div>
+              <div class="field">
+                <label>Card number</label>
+                <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" id="ccNum">
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label>Expiry</label>
+                  <input type="text" placeholder="MM/YY" maxlength="5" id="ccExp">
+                </div>
+                <div class="field">
+                  <label>CVV</label>
+                  <input type="text" placeholder="123" maxlength="4" id="ccCvv">
+                </div>
+              </div>
+            </div>
+
+            <!-- Vodafone Cash -->
+            <div class="pane" data-pane="vodafone">
+              <div class="field">
+                <label>Vodafone Cash number</label>
+                <input type="tel" placeholder="010xxxxxxxx" maxlength="11" id="vodaNum">
+              </div>
+              <div class="wallet-info"><strong>You'll receive an SMS</strong>Approve the payment from your Vodafone Cash app to confirm.</div>
+            </div>
+
+            <!-- InstaPay -->
+            <div class="pane" data-pane="instapay">
+              <div class="field">
+                <label>InstaPay address or mobile</label>
+                <input type="text" placeholder="user@instapay" id="instaAddress">
+              </div>
+              <div class="wallet-info"><strong>Open your InstaPay app</strong>Confirm the request to complete the payment.</div>
+            </div>
+
+            <!-- Fawry -->
+            <div class="pane" data-pane="fawry">
+              <div class="wallet-info">
+                <strong>Reference code will be generated</strong>
+                Pay at any Fawry outlet within 24 hours using the reference code we send to your email.
+              </div>
+            </div>
+
+            <!-- PayPal -->
+            <div class="pane" data-pane="paypal">
+              <div class="field">
+                <label>PayPal email</label>
+                <input type="email" placeholder="you@example.com" id="paypalEmail">
+              </div>
+              <div class="wallet-info"><strong>Redirect to PayPal</strong>You'll be redirected to PayPal to complete the payment securely.</div>
+            </div>
+
+            <!-- Cash -->
+            <div class="pane" data-pane="cash">
+              <div class="wallet-info">
+                <strong>Pay at the cinema</strong>
+                Reserve now and pay in cash at the box office. Please arrive 30 minutes before showtime.
+              </div>
+            </div>
+
+            <div class="secure-note">All payments are encrypted and processed securely</div>
+          </div>
+
+          <aside class="pay-card">
+            <div style="display:flex;gap:14px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #222">
+              <img src="${movie.poster}" style="width:72px;border-radius:8px">
+              <div>
+                <h4 style="margin:0 0 4px 0">${movie.title}</h4>
+                <p style="font-size:12px;color:gray;margin:0">${movie.genre}</p>
+                <p style="font-size:12px;color:var(--gold);margin:4px 0 0 0">${movie.duration}</p>
+              </div>
+            </div>
+            <div class="summary-mini">
+              <div class="row"><span>Cinema</span><span>${cinema.name}</span></div>
+              <div class="row"><span>Date</span><span>${date}</span></div>
+              <div class="row"><span>Time</span><span>${time}</span></div>
+              <div class="row"><span>Seats</span><span style="color:var(--gold)">${seats.join(', ')}</span></div>
+              <div class="row"><span>Tickets</span><span>${seats.length}</span></div>
+              <div class="row total-row"><span>Total</span><span>${total} EGP</span></div>
+            </div>
+            <button class="btn btn-hero btn-block" id="payBtn" style="width:100%;margin-top:20px;padding:14px">
+              Pay ${total} EGP
+            </button>
+            <p style="font-size:11px;color:gray;text-align:center;margin:12px 0 0 0">By confirming you agree to our terms of service.</p>
+          </aside>
+        </div>
+      </div>`;
+
+    // Method switching
+    const methodsEl = document.getElementById('methods');
+    methodsEl.addEventListener('click', e => {
+      const m = e.target.closest('[data-method]');
+      if(!m) return;
+      methodsEl.querySelectorAll('.method').forEach(x => x.classList.remove('active'));
+      m.classList.add('active');
+      const key = m.dataset.method;
+      document.querySelectorAll('[data-pane]').forEach(p => {
+        p.classList.toggle('active', p.dataset.pane === key);
+      });
+    });
+
+    // Card formatting
+    const ccNum = document.getElementById('ccNum');
+    ccNum && ccNum.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,16);
+      e.target.value = v.replace(/(\d{4})(?=\d)/g,'$1 ');
+    });
+    const ccExp = document.getElementById('ccExp');
+    ccExp && ccExp.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,4);
+      if(v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+      e.target.value = v;
+    });
+
+    document.getElementById('payBtn').addEventListener('click', () => {
+      const method = methodsEl.querySelector('.method.active').dataset.method;
+      const labels = {card:'Card',vodafone:'Vodafone Cash',instapay:'InstaPay',fawry:'Fawry',paypal:'PayPal',cash:'Cash at cinema'};
+
+        // Card Validation
+      if(method === 'card'){
+        const num = (document.getElementById('ccNum').value || '').replace(/\s/g,'');
+        const name = document.getElementById('ccName').value.trim();
+        const exp = document.getElementById('ccExp').value.trim();
+        const cvv = document.getElementById('ccCvv').value.trim();
+        if(!name || num.length < 13 || exp.length < 4 || cvv.length < 3){
+          toast('Please fill in all card details', 'error');
+          return;
+        }
+      }
+        // Vodafone Validation
+      if(method === 'vodafone'){
+        const vodaNum = document.getElementById('vodaNum').value.trim();
+        if(!vodaNum || vodaNum.length < 11 || !vodaNum.startsWith('01')){
+            toast('Please enter a valid Vodafone Cash number', 'error');
+            return;
+        }
+    }
+        // Instapay Validation
+    if(method === 'instapay'){
+        const instaAddr = document.getElementById('instaAddress').value.trim();
+        if(!instaAddr || instaAddr.length < 3){
+            toast('Please enter your InstaPay address', 'error');
+            return;
+        }
+    }
+
+        // Paypal Validation
+      if(method === 'paypal'){
+        const email = document.getElementById('paypalEmail').value.trim();
+        if(!email || !email.includes('@') || !email.includes('.')){
+          toast('Please enter a valid PayPal email address', 'error');
+          return;
+        }
+    }
+
+      const btn = document.getElementById('payBtn');
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+      setTimeout(() => {
+        toast(`Payment successful via ${labels[method]}! Enjoy ${movie.title} 🎬`);
+        setTimeout(() => location.href = 'home.html', 1800);
+      }, 1200);
+    });
+  }
+</script>
+</body>
+</html>
