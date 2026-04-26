@@ -25,20 +25,33 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(); // Overrides Spring's auto-generated UserDetailsService so it stops generating a default password
+        return new InMemoryUserDetailsManager(); // Overrides Spring's auto-generated UserDetailsService so it stops
+                                                 // generating a default password
     }
 
-    @Bean // Defines a bean for the security filter chain, configuring how Spring Security should handle authentication and authorization
+    @Bean // Defines a bean for the security filter chain, configuring how Spring Security
+          // should handle authentication and authorization
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Disables CSRF protection because we are using JWTs, which are not vulnerable to CSRF attacks
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Register and login are public — no token needed
-                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN") // Admin endpoints — ROLE_ADMIN only
-                .anyRequest().hasAuthority("ROLE_USER") // All other endpoints require at least ROLE_USER
-            )
-            .addFilterBefore(new JwtFilter(jwtAuth), // Registers JwtFilter to run before Spring's default auth filter
-                UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> cors.configurationSource(request -> {
+                    var config = new org.springframework.web.cors.CorsConfiguration();
+                    config.setAllowedOrigins(java.util.List.of("http://127.0.0.1:5500"));
+                    config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(java.util.List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
+                .csrf(csrf -> csrf.disable()) // Disables CSRF protection because we are using JWTs, which are not
+                                              // vulnerable to CSRF attacks
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll() // Register and login are public — no token needed
+                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN") // Admin endpoints — ROLE_ADMIN
+                                                                                     // only
+                        .anyRequest().hasAuthority("ROLE_USER") // All other endpoints require at least ROLE_USER
+                )
+                .addFilterBefore(new JwtFilter(jwtAuth), // Registers JwtFilter to run before Spring's default auth
+                                                         // filter
+                        UsernamePasswordAuthenticationFilter.class);
         return http.build(); // Builds and returns the configured SecurityFilterChain bean
     }
 }

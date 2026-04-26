@@ -32,7 +32,7 @@
         <main class="admin-main">
             <header class="admin-header">
                 <h2 class="text-gradient-gold">System Command Center</h2>
-                <button class="btn btn-outline">Log Out</button>
+                <button class="btn btn-outline" onclick="handleLogout()">Log Out</button>
             </header>
 
             <div class="admin-content">
@@ -55,5 +55,13 @@
     </div>
 
     <script src="js/common.js"></script>
+    <script>
+        function handleLogout() {
+            Auth.logout();
+            sessionStorage.removeItem('token');
+            toast('Signed out');
+            setTimeout(() => location.href = 'index.html', 400);
+        }
+    </script>
 </body>
 </html>

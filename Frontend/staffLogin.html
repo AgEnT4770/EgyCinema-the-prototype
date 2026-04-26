@@ -81,9 +81,13 @@
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const role = document.querySelector('input[name="role"]:checked')?.value;
+      const btn = e.target.querySelector('button[type="submit"]');
 
       if(username.length < 3) return toast('Username must be at least 3 characters', 'error');
       if(password.length < 6) return toast('Password must be at least 6 characters', 'error');
+
+      btn.disabled = true;
+      btn.textContent = 'Logging in...';
 
       try {
         await Auth.login(username, password);
@@ -94,16 +98,22 @@
         const userRole = payload.roles;
 
         if(role === 'admin' && userRole !== 'ROLE_ADMIN') {
+          btn.disabled = false;
+          btn.style.cursor = 'pointer';
+          btn.textContent = 'Log in';
           return toast('Access denied. You are not an admin.', 'error');
         }
 
         toast(`Welcome, ${role}!`);
         setTimeout(() => {
-          location.href = role === 'admin' ? 'admin.html' : 'employee.html';
+          location.href = role === 'admin' ? 'admin-dashboard.html' : 'employee.html';
         }, 500);
 
       } catch(err) {
         toast(err.message, 'error');
+        btn.disabled = false;
+        btn.style.cursor = 'pointer';
+        btn.textContent = 'Log in';
       }
     });
   </script>

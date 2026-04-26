@@ -35,7 +35,8 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
 /* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
   padding:.65rem 1.25rem;border-radius:.6rem;font-weight:600;font-size:.9rem;
-  transition:transform .2s,opacity .2s,background .2s,border-color .2s;white-space:nowrap}
+  transition:transform .2s,opacity .2s,background .2s,border-color .2s;white-space:nowrap;
+  cursor:pointer}
 .btn:hover{transform:translateY(-1px)}
 .btn-hero{background:var(--gradient-crimson);color:#fff;box-shadow:var(--shadow-glow)}
 .btn-hero:hover{opacity:.95}
@@ -476,11 +477,3 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
     radial-gradient(circle at 20% 30%, rgba(184,30,30,0.2), transparent 40%),
     radial-gradient(circle at 80% 20%, rgba(227,179,65,0.1), transparent 45%);
 }
-
-/* Reusing your Buttons */
-.btn { 
-  display: inline-flex; align-items: center; padding: .6rem 1.2rem; 
-  border-radius: .5rem; font-weight: 600; cursor: pointer; transition: .2s; 
-}
-.btn-hero { background: var(--gradient-crimson); color: #fff; box-shadow: var(--shadow-glow); border: none; }
-.btn-outline { border: 1px solid var(--border); background: transparent; color: var(--fg); }
