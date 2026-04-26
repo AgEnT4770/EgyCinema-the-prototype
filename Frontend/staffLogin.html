@@ -76,18 +76,35 @@
       });
     });
 
-    document.getElementById('staffLoginForm').addEventListener('submit', (e) => {
+    document.getElementById('staffLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const role = document.querySelector('input[name="role"]:checked')?.value;
-      if(username.length < 3) return toast('Username must be at least 3 characters','error');
-      if(password.length < 6) return toast('Password must be at least 6 characters','error');
-      if(!role) return toast('Select a role','error');
-      toast(`Welcome, ${role}!`);
-      setTimeout(() => {
-        location.href = role === 'admin' ? 'admin.html' : 'employee.html';
-      }, 500);
+
+      if(username.length < 3) return toast('Username must be at least 3 characters', 'error');
+      if(password.length < 6) return toast('Password must be at least 6 characters', 'error');
+
+      try {
+        await Auth.login(username, password);
+        
+        // Decode token to check role
+        const token = sessionStorage.getItem('token');
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.roles;
+
+        if(role === 'admin' && userRole !== 'ROLE_ADMIN') {
+          return toast('Access denied. You are not an admin.', 'error');
+        }
+
+        toast(`Welcome, ${role}!`);
+        setTimeout(() => {
+          location.href = role === 'admin' ? 'admin.html' : 'employee.html';
+        }, 500);
+
+      } catch(err) {
+        toast(err.message, 'error');
+      }
     });
   </script>
 </body>
