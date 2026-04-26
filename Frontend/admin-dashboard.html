@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home — EgyCinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="cinema-bg"> <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div class="brand-name">Cinema<span class="text-gold">Admin</span></div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="admin-dashboard.html" class="nav-item active">📊 Dashboard</a>
+                <a href="admin-cinemas.html" class="nav-item">🏢 Cinemas</a>
+                <a href="admin-movies.html" class="nav-item">🎬 Movies</a>
+                <a href="admin-employees.html" class="nav-item">👥 Employees</a>
+                <a href="admin-bookings.html" class="nav-item">🎟️ Bookings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2 class="text-gradient-gold">System Command Center</h2>
+                <button class="btn btn-outline">Log Out</button>
+            </header>
+
+            <div class="admin-content">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                    <div class="admin-panel">
+                        <div class="stat-n">12</div>
+                        <div class="stat-l">Active Cinemas</div>
+                    </div>
+                    <div class="admin-panel">
+                        <div class="stat-n">42</div>
+                        <div class="stat-l">Total Movies</div>
+                    </div>
+                    <div class="admin-panel">
+                        <div class="stat-n text-gold">$12k</div>
+                        <div class="stat-l">Today's Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/common.js"></script>
+</body>
+</html>

@@ -86,7 +86,7 @@
       if(!role) return toast('Select a role','error');
       toast(`Welcome, ${role}!`);
       setTimeout(() => {
-        location.href = role === 'admin' ? 'admin.html' : 'employee.html';
+        location.href = role === 'admin' ? 'admin-dashboard.html' : 'employee-dashboard.html';
       }, 500);
     });
   </script>

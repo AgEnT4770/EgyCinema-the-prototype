@@ -214,3 +214,114 @@ function mountChrome(){
   const lo = document.getElementById('logoutBtn');
   if(lo) lo.addEventListener('click', () => { Auth.logout(); toast('Signed out'); setTimeout(()=>location.href='index.html', 400); });
 }
+/**
+ * Cinema System - Admin Controller Logic
+ * Handles UI interactions, safety checks, and navigation
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Admin System Initialized...");
+
+    // 1. AUTOMATIC SIDEBAR ACTIVE STATE
+    // Checks the current URL and highlights the correct sidebar link
+    const currentPath = window.location.pathname.split("/").pop();
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    navItems.forEach(item => {
+        if (item.getAttribute('href') === currentPath) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
+    // 2. DELETE SAFETY PROTOCOL (DELETE /anything)
+    // Prevents accidental clicks on destructive admin actions
+    const deleteButtons = document.querySelectorAll('.btn-ghost[style*="color:var(--primary)"]');
+    
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const confirmed = confirm("⚠️ WARNING: This action is permanent. Are you sure you want to delete this item?");
+            if (!confirmed) {
+                e.preventDefault();
+            } else {
+                console.log("Proceeding with DELETE request...");
+                // Here is where you would call your DELETE /anything API
+            }
+        });
+    });
+
+    // 3. FORM SUBMISSION (POST /employees, /cinemas, /movies)
+    const adminForms = document.querySelectorAll('form');
+    adminForms.forEach(form => {
+        form.addEventListener('submit', (e) => {
+            // Optional: Add a loading state to the button
+            const submitBtn = form.querySelector('.btn-hero');
+            if (submitBtn) {
+                submitBtn.innerHTML = "Processing...";
+                submitBtn.style.opacity = "0.7";
+                submitBtn.disabled = true;
+            }
+        });
+    });
+
+    // 4. TOAST NOTIFICATIONS (Reusing your .toast CSS)
+    window.showToast = (message, type = 'success') => {
+        const toast = document.createElement('div');
+        toast.className = `toast show ${type}`;
+        toast.innerText = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    };
+});
+// Replace this URL with your actual AWS API Gateway or Backend URL
+// Change this to your Spring Boot server's address
+// Example: 'http://123.45.67.89:8080/api/users' 
+const API_URL = 'http://localhost:8080/api/users'; 
+
+async function fetchUsers() {
+    const tableBody = document.getElementById('user-table-body');
+    
+    try {
+        const response = await fetch(API_URL);
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const users = await response.json(); 
+
+        tableBody.innerHTML = '';
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid var(--border)';
+
+            // Requirement: if no cinema assigned, show "-"
+            const cinemaDisplay = user.assignedCinema ? user.assignedCinema : '-';
+
+            row.innerHTML = `
+                <td style="padding: 1.5rem 1.2rem;">
+                    <div style="font-weight: 600;">${user.name}</div>
+                    <div class="text-muted" style="font-size: 0.8rem;">${user.email}</div>
+                </td>
+                <td style="padding: 1.2rem;">
+                    <span style="color: var(--muted); font-size: 0.8rem; letter-spacing: 1px;">${user.role}</span>
+                </td>
+                <td style="padding: 1.2rem;" class="text-muted">
+                    ${cinemaDisplay}
+                </td>
+                <td style="padding: 1.2rem; text-align: right;">
+                    <button class="btn btn-outline btn-sm">Manage</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error('Fetch error:', error);
+        tableBody.innerHTML = `<tr><td colspan="4" style="padding:2rem; text-align:center; color:var(--primary);">Cannot connect to Spring Boot Server.</td></tr>`;
+    }
+}
