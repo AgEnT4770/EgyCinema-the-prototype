@@ -37,8 +37,8 @@
           <p class="sub">For admins and employees only.</p>
           <form id="staffLoginForm" novalidate>
             <div class="field">
-              <label for="email">Email</label>
-              <input id="email" type="email" autocomplete="email" required />
+              <label for="username">Username</label>
+              <input id="username" type="text" autocomplete="username" required />
             </div>
             <div class="field">
               <label for="password">Password</label>
@@ -78,10 +78,10 @@
 
     document.getElementById('staffLoginForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const role = document.querySelector('input[name="role"]:checked')?.value;
-      if(!/^\S+@\S+\.\S+$/.test(email)) return toast('Enter a valid email','error');
+      if(username.length < 3) return toast('Username must be at least 3 characters','error');
       if(password.length < 6) return toast('Password must be at least 6 characters','error');
       if(!role) return toast('Select a role','error');
       toast(`Welcome, ${role}!`);
