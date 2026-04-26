@@ -56,24 +56,95 @@ const Favs = {
 
 // --- Showtimes (deterministic per movie+cinema) ---
 function _hash(str){ let h = 0; for(let i=0;i<str.length;i++){ h = ((h<<5)-h) + str.charCodeAt(i); h |= 0; } return Math.abs(h); }
-function getShowtimes(movieId, cinemaId){
-  const seed = _hash(movieId + '|' + cinemaId);
-  const today = new Date(); today.setHours(0,0,0,0);
-  const days = [0,1,2].map(d => { const dt = new Date(today); dt.setDate(today.getDate()+d); return dt; });
-  const baseTimes = ['12:30','15:45','18:30','21:15','23:45'];
-  return days.map((dt, i) => {
-    const count = 2 + ((seed >> i) % 3); // 2..4 times
-    const times = [];
-    for(let k=0;k<count;k++) times.push(baseTimes[(seed + i*7 + k*3) % baseTimes.length]);
-    const uniq = [...new Set(times)].sort();
-    return {
-      date: dt,
-      label: i===0 ? 'Today' : i===1 ? 'Tomorrow' : dt.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'}),
-      iso: dt.toISOString().slice(0,10),
-      times: uniq,
-    };
-  });
+async function fetchShowtimes(movieId, cinemaId) {
+  const res = await fetch(
+    `http://localhost:8080/showtimes/movie/${movieId}/cinema/${cinemaId}`
+  );
+
+  if (!res.ok) {
+    console.error("Failed to fetch showtimes");
+    return [];
+  }
+
+  const data = await res.json();
+  return transformShowtimes(data);
 }
+function transformShowtimes(apiData) {
+  const grouped = {};
+
+  apiData.forEach(s => {
+    const dt = new Date(s.dateTime);
+
+    const dateKey = dt.toISOString().slice(0, 10);
+    const time = dt.toTimeString().slice(0, 5);
+
+    if (!grouped[dateKey]) {
+      grouped[dateKey] = {
+        label: formatLabel(dt),
+        times: []
+      };
+    }
+
+    grouped[dateKey].times.push(time);
+  });
+
+  return Object.values(grouped);
+}
+
+function formatLabel(date) {
+  
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+
+  const diff = (d - today) / (1000 * 60 * 60 * 24);
+
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Tomorrow";
+
+  return d.toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+
+}
+async function loadShowtimes(movie, cinemas) {
+  const container = document.getElementById("showingGrid");
+
+  const htmlParts = await Promise.all(
+    cinemas.map(async (c) => {
+      const shows = await fetchShowtimes(movie.id, c.id);
+
+      return `
+        <div class="showing-card">
+          <div class="name">${c.name}</div>
+          <div class="where">${c.location}</div>
+
+          ${shows.map(d => `
+            <div class="show-day">
+              <div>${d.label}</div>
+              <div>
+                ${d.times.map(t => `
+                  <button class="time-chip"
+                    onclick="bookTicket('${movie.id}', '${c.id}', '${d.label}', '${t}')">
+                    ${t}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    })
+  );
+
+  container.innerHTML = htmlParts.join('');
+}
+
+
 
   // Book ticket
   function bookTicket(movieId, cinemaId, dateLabel, time) {
