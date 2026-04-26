@@ -1,9 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.AuthService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,7 +40,7 @@ public class AuthController {
         String password = body.get("password"); // Extracts the password from the request body
         String token = authService.loginUser(username, password); // Calls the AuthService to log in the user
         if (token != null) {
-            return ResponseEntity.ok("User logged in successfully"); // Returns a success response if login is successful
+            return ResponseEntity.ok(token); // Returns a success response if login is successful
         } else {
             return ResponseEntity.status(401).body("Invalid credentials"); // Returns an error response if the credentials are invalid
         }
