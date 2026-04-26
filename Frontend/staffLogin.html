@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Staff Log in — EgyCinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .role-group { display:flex; gap:.75rem; margin-top:.5rem; }
+    .role-opt {
+      flex:1; display:flex; align-items:center; justify-content:center; gap:.5rem;
+      padding:.75rem 1rem; border:1px solid rgba(255,255,255,.15); border-radius:.6rem;
+      cursor:pointer; transition:all .2s ease; font-weight:500; color:inherit;
+      background:rgba(255,255,255,.03);
+    }
+    .role-opt input { position:absolute; opacity:0; pointer-events:none; }
+    .role-opt:hover { border-color:rgba(212,175,55,.5); }
+    .role-opt.is-selected {
+      border-color:#d4af37; background:rgba(212,175,55,.12);
+      box-shadow:0 0 0 1px #d4af37 inset;
+    }
+  </style>
+</head>
+<body>
+  <div class="cinema-bg">
+    <main class="auth-main">
+      <div class="auth-wrap">
+        <a href="index.html" class="auth-brand">
+          <span class="brand-mark"></span>
+          <span class="brand-name" style="font-size:1.5rem">Egy<span class="text-gradient-gold">Cinema</span></span>
+        </a>
+        <div class="auth-card scale-in">
+          <h1>Staff log in</h1>
+          <p class="sub">For admins and employees only.</p>
+          <form id="staffLoginForm" novalidate>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" type="email" autocomplete="email" required />
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input id="password" type="password" autocomplete="current-password" required />
+            </div>
+            <div class="field">
+              <label>Role</label>
+              <div class="role-group" id="roleGroup">
+                <label class="role-opt is-selected" data-role="admin">
+                  <input type="radio" name="role" value="admin" checked />
+                  <span>Admin</span>
+                </label>
+                <label class="role-opt" data-role="employee">
+                  <input type="radio" name="role" value="employee" />
+                  <span>Employee</span>
+                </label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-hero btn-lg" style="width:100%">Log in</button>
+          </form>
+          <p class="auth-foot">Customer login? <a href="login.html">Go here</a></p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="js/common.js"></script>
+  <script>
+    document.querySelector('.auth-brand .brand-mark').innerHTML = ICONS.film;
+
+    const roleGroup = document.getElementById('roleGroup');
+    roleGroup.addEventListener('change', () => {
+      roleGroup.querySelectorAll('.role-opt').forEach(opt => {
+        const input = opt.querySelector('input');
+        opt.classList.toggle('is-selected', input.checked);
+      });
+    });
+
+    document.getElementById('staffLoginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const role = document.querySelector('input[name="role"]:checked')?.value;
+      if(!/^\S+@\S+\.\S+$/.test(email)) return toast('Enter a valid email','error');
+      if(password.length < 6) return toast('Password must be at least 6 characters','error');
+      if(!role) return toast('Select a role','error');
+      toast(`Welcome, ${role}!`);
+      setTimeout(() => {
+        location.href = role === 'admin' ? 'admin.html' : 'employee.html';
+      }, 500);
+    });
+  </script>
+</body>
+</html>
