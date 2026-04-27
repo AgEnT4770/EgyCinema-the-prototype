@@ -126,7 +126,7 @@
             });
             
             if (res.ok) {
-                toast(`${username} is now ${newRole}`);
+                toast(`${username} has been ${newRole === 'ROLE_ADMIN' ? 'promoted to Admin' : 'demoted to User'}`);
                 fetchUsers(); // refresh the table
             } else {
                 toast('Failed to update role', 'error');
@@ -143,7 +143,7 @@
             });
             
             if (res.ok) {
-                toast(`${username} deleted successfully`);
+                toast(`${username} has been removed successfully`);
                 fetchUsers(); // refresh the table
             } else {
                 toast('Failed to delete user', 'error');
