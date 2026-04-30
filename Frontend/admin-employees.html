@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Management | CinemaAdmin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="cinema-bg">
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="brand-name">Cinema<span class="text-gold">Admin</span></div>
+            </div>
+            <nav class="nav-menu">
+                <a href="admin-dashboard.html" class="nav-item">📊 Dashboard</a>
+                <a href="admin-cinemas.html" class="nav-item">🏢 Cinemas</a>
+                <a href="admin-movies.html" class="nav-item">🎬 Movies</a>
+                <a href="admin-employees.html" class="nav-item active">👥 Employees</a>
+                <a href="admin-bookings.html" class="nav-item">🎟️ Bookings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2 class="text-gradient-gold">User Directory</h2>
+                <div class="header-actions">
+                    <span class="text-muted" style="font-size: 0.8rem; margin-right: 1rem;">All Users</span>
+                    <button class="btn btn-hero" onclick="fetchUsers()">🔄 Refresh Data</button>
+                </div>
+            </header>
+            <div class="admin-content">
+                <div class="admin-panel">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; color: var(--gold); border-bottom: 1px solid var(--border);">
+                                <th style="padding: 1.2rem;">User Details</th>
+                                <th style="padding: 1.2rem;">Role</th>
+                                <th style="padding: 1.2rem;">Assigned Cinema</th>
+                                <th style="padding: 1.2rem; text-align: right;">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body">
+                            <tr>
+                                <td colspan="4" style="padding: 3rem; text-align: center;" class="text-muted">
+                                    Connecting to AWS Database...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/common.js"></script>
+    <script>
+        async function fetchUsers() {
+            const token = sessionStorage.getItem('token');
+            const tbody = document.getElementById('user-table-body');
+            
+            // Get current logged in username from token
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const currentUser = payload.sub;
+            
+            try {
+                const res = await fetch('http://localhost:8080/api/admin/users', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (!res.ok) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="padding:3rem;text-align:center" class="text-muted">Access denied. Admin only.</td></tr>`;
+                    return;
+                }
+                
+                const users = await res.json();
+                
+                tbody.innerHTML = users.map(user => `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1.2rem; font-weight: 600;">${user.username}</td>
+                        <td style="padding: 1.2rem;">
+                            <span style="background: ${user.role === 'ROLE_ADMIN' ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.08)'}; 
+                                  color: ${user.role === 'ROLE_ADMIN' ? 'var(--gold)' : 'inherit'}; 
+                                  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;">
+                                ${user.role}
+                            </span>
+                        </td>
+                        <td style="padding: 1.2rem;" class="text-muted">—</td>
+                        <td style="padding: 1.2rem; text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            ${user.username.toLowerCase() === currentUser.toLowerCase() ?
+                                `<span class="text-muted" style="font-size:0.8rem; padding: 0.45rem 0;">You</span>` :
+                                `<button class="btn btn-outline btn-sm" onclick="promoteUser('${user.username}')">
+                                    ${user.role === 'ROLE_ADMIN' ? 'Demote' : 'Promote'}
+                                </button>
+                                <button class="btn btn-outline btn-sm" style="color: var(--primary);" onclick="deleteUser('${user.username}')">
+                                    Delete
+                                </button>`
+                            }
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch(err) {
+                tbody.innerHTML = `<tr><td colspan="4" style="padding:3rem;text-align:center" class="text-muted">Failed to load users.</td></tr>`;
+            }
+        }
+
+        async function promoteUser(username) {
+            const token = sessionStorage.getItem('token');
+            const users = await (await fetch('http://localhost:8080/api/admin/users', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })).json();
+            
+            const user = users.find(u => u.username === username);
+            const newRole = user.role === 'ROLE_ADMIN' ? 'ROLE_USER' : 'ROLE_ADMIN';
+            
+            const res = await fetch(`http://localhost:8080/api/admin/users/${username}/role`, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: newRole })
+            });
+            
+            if (res.ok) {
+                toast(`${username} has been ${newRole === 'ROLE_ADMIN' ? 'promoted to Admin' : 'demoted to User'}`);
+                fetchUsers(); // refresh the table
+            } else {
+                toast('Failed to update role', 'error');
+            }
+        }
+
+        async function deleteUser(username) {
+            if (!confirm(`Are you sure you want to delete ${username}?`)) return;
+            
+            const token = sessionStorage.getItem('token');
+            const res = await fetch(`http://localhost:8080/api/admin/users/${username}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (res.ok) {
+                toast(`${username} has been removed successfully`);
+                fetchUsers(); // refresh the table
+            } else {
+                toast('Failed to delete user', 'error');
+            }
+        }
+
+        // Load users automatically on page load
+        fetchUsers();
+    </script>
+</body>
+</html>

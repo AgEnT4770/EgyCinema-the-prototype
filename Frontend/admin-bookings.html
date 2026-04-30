@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Bookings | CinemaAdmin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="cinema-bg">
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="brand-name">Cinema<span class="text-gold">Admin</span></div>
+            </div>
+            <nav class="nav-menu">
+                <a href="admin-dashboard.html" class="nav-item">📊 Dashboard</a>
+                <a href="admin-cinemas.html" class="nav-item">🏢 Cinemas</a>
+                <a href="admin-movies.html" class="nav-item">🎬 Movies</a>
+                <a href="admin-employees.html" class="nav-item">👥 Employees</a>
+                <a href="admin-bookings.html" class="nav-item active">🎟️ Bookings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2 class="text-gradient-gold">Global Bookings Ledger</h2>
+                <button class="btn btn-outline">Export to CSV</button>
+            </header>
+            <div class="admin-content">
+                <div class="admin-panel">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; color: var(--gold); border-bottom: 1px solid var(--border);">
+                                <th style="padding: 1.2rem;">ID</th>
+                                <th style="padding: 1.2rem;">Movie & Location</th>
+                                <th style="padding: 1.2rem;">Customer</th>
+                                <th style="padding: 1.2rem;">Amount</th>
+                                <th style="padding: 1.2rem; text-align: right;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 1.5rem 1.2rem; font-family: monospace;" class="text-gold">#TK-4412</td>
+                                <td style="padding: 1.2rem;">
+                                    <div style="font-weight: 600;">Oppenheimer</div>
+                                    <div class="text-muted" style="font-size: 0.8rem;">Westside Theater</div>
+                                </td>
+                                <td style="padding: 1.2rem;">alex.p@email.com</td>
+                                <td style="padding: 1.2rem; font-weight: 600;">$18.50</td>
+                                <td style="padding: 1.2rem; text-align: right;">
+                                    <span style="background: rgba(70,180,90,0.15); color: #46b45a; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid rgba(70,180,90,0.3);">Confirmed</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/common.js"></script>
+</body>
+</html>

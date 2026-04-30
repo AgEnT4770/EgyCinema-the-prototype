@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Catalog | CinemaAdmin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="cinema-bg">
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="brand-name">Cinema<span class="text-gold">Admin</span></div>
+            </div>
+            <nav class="nav-menu">
+                <a href="admin-dashboard.html" class="nav-item">📊 Dashboard</a>
+                <a href="admin-cinemas.html" class="nav-item">🏢 Cinemas</a>
+                <a href="admin-movies.html" class="nav-item active">🎬 Movies</a>
+                <a href="admin-employees.html" class="nav-item">👥 Employees</a>
+                <a href="admin-bookings.html" class="nav-item">🎟️ Bookings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2 class="text-gradient-gold">Movie Catalog</h2>
+                <button class="btn btn-hero">Upload New Movie</button>
+            </header>
+            <div class="admin-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem;">
+                    <div class="admin-panel" style="padding: 1rem; text-align: center;">
+                        <div style="background: #000; height: 300px; border-radius: 0.5rem; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--border);">
+                            <img src="/api/placeholder/200/300" alt="Poster" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+                        </div>
+                        <h4 style="margin-bottom: 1rem; font-size: 1.1rem;">Dune: Part Two</h4>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-outline btn-sm" style="flex: 1;">Edit</button>
+                            <button class="btn btn-outline btn-sm" style="color: var(--primary);">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/common.js"></script>
+</body>
+</html>

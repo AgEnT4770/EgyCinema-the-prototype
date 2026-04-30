@@ -37,14 +37,14 @@
           <p class="sub">For admins and employees only.</p>
           <form id="staffLoginForm" novalidate>
             <div class="field">
-              <label for="email">Email</label>
-              <input id="email" type="email" autocomplete="email" required />
+              <label for="username">Username</label>
+              <input id="username" type="text" autocomplete="username" required />
             </div>
             <div class="field">
               <label for="password">Password</label>
               <input id="password" type="password" autocomplete="current-password" required />
             </div>
-            <div class="field">
+            <!-- <div class="field">
               <label>Role</label>
               <div class="role-group" id="roleGroup">
                 <label class="role-opt is-selected" data-role="admin">
@@ -56,7 +56,7 @@
                   <span>Employee</span>
                 </label>
               </div>
-            </div>
+            </div> -->
             <button type="submit" class="btn btn-hero btn-lg" style="width:100%">Log in</button>
           </form>
           <p class="auth-foot">Customer login? <a href="login.html">Go here</a></p>
@@ -68,26 +68,53 @@
   <script>
     document.querySelector('.auth-brand .brand-mark').innerHTML = ICONS.film;
 
-    const roleGroup = document.getElementById('roleGroup');
-    roleGroup.addEventListener('change', () => {
-      roleGroup.querySelectorAll('.role-opt').forEach(opt => {
-        const input = opt.querySelector('input');
-        opt.classList.toggle('is-selected', input.checked);
-      });
-    });
+    // const roleGroup = document.getElementById('roleGroup');
+    // roleGroup.addEventListener('change', () => {
+    //   roleGroup.querySelectorAll('.role-opt').forEach(opt => {
+    //     const input = opt.querySelector('input');
+    //     opt.classList.toggle('is-selected', input.checked);
+    //   });
+    // });
 
-    document.getElementById('staffLoginForm').addEventListener('submit', (e) => {
+    document.getElementById('staffLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const role = document.querySelector('input[name="role"]:checked')?.value;
-      if(!/^\S+@\S+\.\S+$/.test(email)) return toast('Enter a valid email','error');
-      if(password.length < 6) return toast('Password must be at least 6 characters','error');
-      if(!role) return toast('Select a role','error');
-      toast(`Welcome, ${role}!`);
-      setTimeout(() => {
-        location.href = role === 'admin' ? 'admin.html' : 'employee.html';
-      }, 500);
+      const btn = e.target.querySelector('button[type="submit"]');
+
+      if(username.length < 3) return toast('Username must be at least 3 characters', 'error');
+      if(password.length < 6) return toast('Password must be at least 6 characters', 'error');
+
+      btn.disabled = true;
+      btn.textContent = 'Logging in...';
+
+      try {
+        await Auth.login(username, password);
+        
+        // Decode token to check role
+        const token = sessionStorage.getItem('token');
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.roles;
+
+        // if(role === 'admin' && userRole !== 'ROLE_ADMIN') {
+        //   btn.disabled = false;
+        //   btn.style.cursor = 'pointer';
+        //   btn.textContent = 'Log in';
+        //   return toast('Access denied. You are not an admin.', 'error');
+        // }
+
+        toast('Welcome!');
+        setTimeout(() => {
+          location.href = 'admin-dashboard.html';
+        }, 500);
+
+      } catch(err) {
+        toast(err.message, 'error');
+        btn.disabled = false;
+        btn.style.cursor = 'pointer';
+        btn.textContent = 'Log in';
+      }
     });
   </script>
 </body>
