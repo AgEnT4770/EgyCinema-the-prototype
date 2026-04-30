@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sign up — EgyCinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="cinema-bg">
+    <main class="auth-main">
+      <div class="auth-wrap">
+        <a href="index.html" class="auth-brand">
+          <span class="brand-mark"></span>
+          <span class="brand-name" style="font-size:1.5rem">Egy<span class="text-gradient-gold">Cinema</span></span>
+        </a>
+        <div class="auth-card scale-in">
+          <h1>Create your account</h1>
+          <p class="sub">Join EgyCinema and never miss a premiere.</p>
+          <form id="signupForm" novalidate>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" type="email" autocomplete="email" required />
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input id="password" type="password" autocomplete="new-password" required />
+            </div>
+            <button type="submit" class="btn btn-hero btn-lg" style="width:100%">Create account</button>
+          </form>
+          <p class="auth-foot">Already have an account? <a href="login.html">Log in</a></p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="js/common.js"></script>
+  <script>
+    document.querySelector('.auth-brand .brand-mark').innerHTML = ICONS.film;
+    document.getElementById('signupForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if(!/^\S+@\S+\.\S+$/.test(email)) return toast('Enter a valid email','error');
+      if(password.length < 6) return toast('Password must be at least 6 characters','error');
+      try { Auth.signup(email, password); toast('Account created! Welcome to EgyCinema.'); setTimeout(()=>location.href='home.html', 500); }
+      catch(err){ toast(err.message, 'error'); }
+    });
+  </script>
+</body>
+</html>
