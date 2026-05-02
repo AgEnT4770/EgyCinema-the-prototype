@@ -8,21 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
-  <style>
-    .role-group { display:flex; gap:.75rem; margin-top:.5rem; }
-    .role-opt {
-      flex:1; display:flex; align-items:center; justify-content:center; gap:.5rem;
-      padding:.75rem 1rem; border:1px solid rgba(255,255,255,.15); border-radius:.6rem;
-      cursor:pointer; transition:all .2s ease; font-weight:500; color:inherit;
-      background:rgba(255,255,255,.03);
-    }
-    .role-opt input { position:absolute; opacity:0; pointer-events:none; }
-    .role-opt:hover { border-color:rgba(212,175,55,.5); }
-    .role-opt.is-selected {
-      border-color:#d4af37; background:rgba(212,175,55,.12);
-      box-shadow:0 0 0 1px #d4af37 inset;
-    }
-  </style>
 </head>
 <body>
   <div class="cinema-bg">
@@ -44,7 +29,7 @@
               <label for="password">Password</label>
               <input id="password" type="password" autocomplete="current-password" required />
             </div>
-            <!-- <div class="field">
+            <div class="field">
               <label>Role</label>
               <div class="role-group" id="roleGroup">
                 <label class="role-opt is-selected" data-role="admin">
@@ -56,7 +41,7 @@
                   <span>Employee</span>
                 </label>
               </div>
-            </div> -->
+            </div>
             <button type="submit" class="btn btn-hero btn-lg" style="width:100%">Log in</button>
           </form>
           <p class="auth-foot">Customer login? <a href="login.html">Go here</a></p>
@@ -68,13 +53,13 @@
   <script>
     document.querySelector('.auth-brand .brand-mark').innerHTML = ICONS.film;
 
-    // const roleGroup = document.getElementById('roleGroup');
-    // roleGroup.addEventListener('change', () => {
-    //   roleGroup.querySelectorAll('.role-opt').forEach(opt => {
-    //     const input = opt.querySelector('input');
-    //     opt.classList.toggle('is-selected', input.checked);
-    //   });
-    // });
+    const roleGroup = document.getElementById('roleGroup');
+    roleGroup.addEventListener('change', () => {
+      roleGroup.querySelectorAll('.role-opt').forEach(opt => {
+        const input = opt.querySelector('input');
+        opt.classList.toggle('is-selected', input.checked);
+      });
+    });
 
     document.getElementById('staffLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -104,10 +89,14 @@
         //   return toast('Access denied. You are not an admin.', 'error');
         // }
 
+        // toast('Welcome!');
+        // setTimeout(() => {
+        //   location.href = 'admin-dashboard.html';
+        // }, 500);
+
         toast('Welcome!');
-        setTimeout(() => {
-          location.href = 'admin-dashboard.html';
-        }, 500);
+        const dest = role === 'employee' ? 'employee-dashboard.html' : 'admin-dashboard.html';
+        setTimeout(() => { location.href = dest; }, 500);
 
       } catch(err) {
         toast(err.message, 'error');

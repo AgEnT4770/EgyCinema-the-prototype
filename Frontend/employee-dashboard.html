@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Dashboard | EgyCinema</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="cinema-bg">
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="brand-name">Cinema<span class="text-gold">Employee</span></div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-tab="overview">📊 Overview</a>
+                <a href="#" class="nav-item" data-tab="movies">🎬 Movies</a>
+                <a href="#" class="nav-item" data-tab="showtimes">🕒 Showtimes</a>
+                <a href="#" class="nav-item" data-tab="pricing">💵 Ticket Pricing</a>
+                <a href="#" class="nav-item" data-tab="bookings">🎟️ Bookings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <div>
+                    <h2 class="text-gradient-gold">Employee Console</h2>
+                    <div style="margin-top:.4rem;">
+                        <span class="pill pill-cinema" id="cinemaPill">🏢 Cinema: —</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline" onclick="handleLogout()">Log Out</button>
+            </header>
+
+            <div class="admin-content">
+
+              <!-- OVERVIEW -->
+              <section class="tab-panel active" data-panel="overview">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.5rem; margin-bottom:2rem;">
+                    <div class="admin-panel"><div class="stat-n">8</div><div class="stat-l">Movies Showing</div></div>
+                    <div class="admin-panel"><div class="stat-n">24</div><div class="stat-l">Active Showtimes</div></div>
+                    <div class="admin-panel"><div class="stat-n text-gold">142</div><div class="stat-l">Bookings Today</div></div>
+                </div>
+                </section>
+
+              <!-- MOVIES -->
+              <section class="tab-panel" data-panel="movies">
+                <div class="admin-panel">
+                    <h3 style="margin-top:0;">Add Movie to Your Cinema</h3>
+                    <form id="movieForm" onsubmit="addMovie(event)">
+                        <div class="form-grid">
+                            <label>Title<input name="title" required></label>
+                            <label>Duration (min)<input name="duration" type="number" min="1" required></label>
+                            <label>Genre<input name="genre" placeholder="Action, Drama..."></label>
+                            <label>Poster URL<input name="poster" type="url"></label>
+                            <label>Backdrop URL<input name="backdrop" type="url"></label>
+                            <label>Release Year<input name="year" type="number" min="1900"></label>
+                            <label class="full-width">Description<textarea name="description"></textarea></label>
+                        </div>
+                        <button type="submit" class="btn btn-hero">Add Movie</button>
+                    </form>
+                </div>
+                <div class="admin-panel" style="margin-top:1.5rem;">
+                    <h3 style="margin-top:0;">Movies at Your Cinema</h3>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead><tr style="text-align:left;color:var(--gold);border-bottom:1px solid var(--border);">
+                            <th style="padding:.9rem;">Title</th><th style="padding:.9rem;">Duration</th><th style="padding:.9rem;">Genre</th><th style="padding:.9rem;text-align:right;">Actions</th>
+                        </tr></thead>
+                        <tbody id="moviesBody"></tbody>
+                    </table>
+                </div>
+              </section>
+
+              <!-- SHOWTIMES -->
+              <section class="tab-panel" data-panel="showtimes">
+                <div class="admin-panel">
+                    <h3 style="margin-top:0;">Add Showtime <span class="text-muted" style="font-weight:400;font-size:.8rem;">POST /showtimes</span></h3>
+                    <form id="showtimeForm" onsubmit="addShowtime(event)">
+                        <div class="form-grid">
+                            <label>Movie<select name="movie" id="showMovieSel" required></select></label>
+                            <label>Date<input name="date" type="date" required></label>
+                            <label>Time<input name="time" type="time" required></label>
+                            <label>Screen / Hall<input name="hall" placeholder="Hall 1"></label>
+                        </div>
+                        <button type="submit" class="btn btn-hero">Add Showtime</button>
+                    </form>
+                </div>
+                <div class="admin-panel" style="margin-top:1.5rem;">
+                    <h3 style="margin-top:0;">Scheduled Showtimes <span class="text-muted" style="font-weight:400;font-size:.8rem;">PUT /showtimes/{id}</span></h3>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead><tr style="text-align:left;color:var(--gold);border-bottom:1px solid var(--border);">
+                            <th style="padding:.9rem;">Movie</th><th style="padding:.9rem;">Date</th><th style="padding:.9rem;">Time</th><th style="padding:.9rem;">Hall</th><th style="padding:.9rem;text-align:right;">Update</th>
+                        </tr></thead>
+                        <tbody id="showtimesBody"></tbody>
+                    </table>
+                </div>
+              </section>
+
+              <!-- PRICING -->
+              <section class="tab-panel" data-panel="pricing">
+                <div class="admin-panel">
+                    <h3 style="margin-top:0;">Ticket Pricing <span class="text-muted" style="font-weight:400;font-size:.8rem;">PUT /ticket-price</span></h3>
+                    <form id="priceForm" onsubmit="updatePrice(event)">
+                        <div class="form-grid">
+                            <label class="small-input">Standard ($)<input name="standard" type="number" step="0.01" min="0" value="10.00" required></label>
+                        </div>
+                        <button type="submit" class="btn btn-hero">Update Pricing</button>
+                    </form>
+                </div>
+              </section>
+
+              <!-- BOOKINGS -->
+              <section class="tab-panel" data-panel="bookings">
+                <div class="admin-panel">
+                    <h3 style="margin-top:0;">Bookings — Your Cinema Only <span class="pill pill-locked" style="margin-left:.5rem;">scoped</span></h3>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead><tr style="text-align:left;color:var(--gold);border-bottom:1px solid var(--border);">
+                            <th style="padding:1rem;">Ticket</th><th style="padding:1rem;">Movie</th><th style="padding:1rem;">Customer</th><th style="padding:1rem;">Showtime</th><th style="padding:1rem;text-align:right;">Status</th>
+                        </tr></thead>
+                        <tbody id="bookingsBody">
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:1.2rem;font-family:monospace;" class="text-gold">#TK-9001</td>
+                                <td style="padding:1.2rem;">Dune: Part Two</td>
+                                <td style="padding:1.2rem;">sara@email.com</td>
+                                <td style="padding:1.2rem;">Today · 21:15 · Hall 1</td>
+                                <td style="padding:1.2rem;text-align:right;"><span style="background:rgba(70,180,90,0.15);color:#46b45a;padding:4px 10px;border-radius:20px;font-size:.75rem;border:1px solid rgba(70,180,90,0.3);">Confirmed</span></td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:1.2rem;font-family:monospace;" class="text-gold">#TK-9002</td>
+                                <td style="padding:1.2rem;">Oppenheimer</td>
+                                <td style="padding:1.2rem;">omar@email.com</td>
+                                <td style="padding:1.2rem;">Tomorrow · 18:30 · Hall 3</td>
+                                <td style="padding:1.2rem;text-align:right;"><span style="background:rgba(70,180,90,0.15);color:#46b45a;padding:4px 10px;border-radius:20px;font-size:.75rem;border:1px solid rgba(70,180,90,0.3);">Confirmed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+              </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+
+function toast(message, type = 'success') {
+
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast ${type}`;
+    toastEl.innerHTML = `
+        <span>${type === 'success' ? '✅' : '❌'}</span>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toastEl);
+    setTimeout(() => {
+        toastEl.remove();
+        if (container.childNodes.length === 0) container.remove();
+    }, 3000);
+}
+        (function initEmployee(){
+            let username = 'Employee';
+            try {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    username = payload.sub || username;
+                }
+            } catch(_) {}
+            const cinema = localStorage.getItem('egycinema:employee:cinema') || 'Grand Royale Megaplex';
+            localStorage.setItem('egycinema:employee:cinema', cinema);
+            document.getElementById('cinemaPill').textContent = `🏢 ${username} · Cinema: ${cinema}`;
+        })();
+
+        const navItems = document.querySelectorAll('.nav-item[data-tab]');
+        const panels = document.querySelectorAll('.tab-panel');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tab = item.dataset.tab;
+                navItems.forEach(n => n.classList.toggle('active', n === item));
+                panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
+            });
+        });
+
+        const STORE = {
+            getMovies(){ try { return JSON.parse(localStorage.getItem('egycinema:emp:movies')) || []; } catch { return []; } },
+            setMovies(v){ localStorage.setItem('egycinema:emp:movies', JSON.stringify(v)); },
+            getShows(){ try { return JSON.parse(localStorage.getItem('egycinema:emp:shows')) || []; } catch { return []; } },
+            setShows(v){ localStorage.setItem('egycinema:emp:shows', JSON.stringify(v)); },
+        };
+
+        function renderMovies(){
+            const movies = STORE.getMovies();
+            const tbody = document.getElementById('moviesBody');
+            const sel = document.getElementById('showMovieSel');
+            if (!movies.length) {
+                tbody.innerHTML = `<tr><td colspan="4" style="padding:2rem;text-align:center" class="text-muted">No movies yet. Add one above.</td></tr>`;
+            } else {
+                tbody.innerHTML = movies.map(m => `
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:.9rem;font-weight:600;">${m.title}</td>
+                        <td style="padding:.9rem;">${m.duration} min</td>
+                        <td style="padding:.9rem;" class="text-muted">${m.genre || '—'}</td>
+                        <td style="padding:.9rem;text-align:right;">
+                            <button class="btn btn-outline btn-sm" onclick="removeMovie('${m.id}')" style="color:var(--primary);">Remove</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            sel.innerHTML = movies.length
+                ? movies.map(m => `<option value="${m.id}">${m.title}</option>`).join('')
+                : `<option value="">— Add a movie first —</option>`;
+        }
+
+        function renderShows(){
+            const shows = STORE.getShows();
+            const movies = STORE.getMovies();
+            const tbody = document.getElementById('showtimesBody');
+            if (!shows.length) {
+                tbody.innerHTML = `<tr><td colspan="5" style="padding:2rem;text-align:center" class="text-muted">No showtimes scheduled yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = shows.map(s => {
+                const m = movies.find(x => x.id === s.movieId);
+                return `
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:.9rem;font-weight:600;">${m ? m.title : '(deleted)'}</td>
+                        <td style="padding:.9rem;">${s.date}</td>
+                        <td style="padding:.9rem;">${s.time}</td>
+                        <td style="padding:.9rem;" class="text-muted">${s.hall || '—'}</td>
+                        <td style="padding:.9rem;text-align:right;">
+                            <button class="btn btn-outline btn-sm" onclick="editShow('${s.id}')">Edit</button>
+                            <button class="btn btn-outline btn-sm" style="color:var(--primary);" onclick="removeShow('${s.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function addMovie(e){
+            e.preventDefault();
+            const f = e.target;
+            const movies = STORE.getMovies();
+            movies.push({
+                id: 'm_' + Date.now(),
+                title: f.title.value.trim(),
+                duration: Number(f.duration.value),
+                genre: f.genre.value.trim(),
+                poster: f.poster.value.trim(),
+                backdrop: f.backdrop.value.trim(),
+                description: f.description.value.trim()
+            });
+            STORE.setMovies(movies);
+            f.reset();
+            toast('Movie added');
+            renderMovies();
+        }
+        function removeMovie(id){
+            STORE.setMovies(STORE.getMovies().filter(m => m.id !== id));
+            STORE.setShows(STORE.getShows().filter(s => s.movieId !== id));
+            toast('Movie removed');
+            renderMovies(); renderShows();
+        }
+
+        function addShowtime(e){
+            e.preventDefault();
+            const f = e.target;
+            if (!f.movie.value) return toast('Add a movie first', 'error');
+            const shows = STORE.getShows();
+            shows.push({
+                id: 's_' + Date.now(),
+                movieId: f.movie.value,
+                date: f.date.value,
+                time: f.time.value,
+                hall: f.hall.value.trim(),
+            });
+            STORE.setShows(shows);
+            f.reset();
+            toast('Showtime scheduled');
+            renderShows();
+        }
+        function editShow(id){
+            const shows = STORE.getShows();
+            const s = shows.find(x => x.id === id);
+            if (!s) return;
+            const newDate = prompt('New date (YYYY-MM-DD):', s.date);
+            if (newDate === null) return;
+            const newTime = prompt('New time (HH:MM):', s.time);
+            if (newTime === null) return;
+            s.date = newDate || s.date;
+            s.time = newTime || s.time;
+            STORE.setShows(shows);
+            toast('Showtime updated');
+            renderShows();
+        }
+        function removeShow(id){
+            STORE.setShows(STORE.getShows().filter(s => s.id !== id));
+            toast('Showtime removed');
+            renderShows();
+        }
+
+        function updatePrice(e){
+            e.preventDefault();
+            const f = e.target;
+            const prices = { standard: f.standard.value, premium: f.premium.value, vip: f.vip.value };
+            localStorage.setItem('egycinema:emp:prices', JSON.stringify(prices));
+            toast('Ticket pricing updated');
+        }
+
+        // Restore prices
+        try {
+            const p = JSON.parse(localStorage.getItem('egycinema:emp:prices'));
+            if (p) {
+                const f = document.getElementById('priceForm');
+                f.standard.value = p.standard;
+                f.premium.value = p.premium;
+                f.vip.value = p.vip;
+            }
+        } catch(_) {}
+
+        renderMovies();
+        renderShows();
+
+        function handleLogout() {
+            Auth.logout();
+            sessionStorage.removeItem('token');
+            toast('Signed out');
+            setTimeout(() => location.href = 'index.html', 400);
+        }
+    </script>
+</body>
+</html>

@@ -479,3 +479,70 @@ input{font:inherit}
     radial-gradient(circle at 20% 30%, rgba(184,30,30,0.2), transparent 40%),
     radial-gradient(circle at 80% 20%, rgba(227,179,65,0.1), transparent 45%);
 }
+
+
+/* =========================================
+        ADMIN & EMPLOYEE LOGIN STYLES
+========================================= */
+
+.role-group { display:flex; gap:.75rem; margin-top:.5rem; }
+.role-opt {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:.5rem;
+  padding:.75rem 1rem; border:1px solid rgba(255,255,255,.15); border-radius:.6rem;
+  cursor:pointer; transition:all .2s ease; font-weight:500; color:inherit;
+  background:rgba(255,255,255,.03);
+}
+.role-opt input { position:absolute; opacity:0; pointer-events:none; }
+.role-opt:hover { border-color:rgba(212,175,55,.5); }
+.role-opt.is-selected {
+  border-color:#d4af37; background:rgba(212,175,55,.12);
+  box-shadow:0 0 0 1px #d4af37 inset;
+}
+
+
+/* =========================================
+        EMPLOYEE DASHBOARD STYLES
+========================================= */
+
+.tabs { display:flex; gap:.5rem; border-bottom:1px solid var(--border); margin-bottom:1.5rem; flex-wrap:wrap; }
+      .tab-btn {
+        background:transparent; color:inherit; border:none; padding:.85rem 1.2rem;
+        cursor:pointer; font-weight:600; font-size:.95rem; opacity:.65;
+        border-bottom:2px solid transparent; transition:all .2s;
+      }
+      .tab-btn:hover { opacity:1; }
+      .tab-btn.active { opacity:1; color:var(--gold); border-bottom-color:var(--gold); }
+      .tab-panel { display:none; }
+      .tab-panel.active { display:block; }
+      .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:1rem; }
+      .form-grid label { display:flex; flex-direction:column; gap:.4rem; font-size:.85rem; color:var(--gold); font-weight:600; }
+      .form-grid input, .form-grid select {
+        padding:.7rem .85rem; border-radius:.5rem; border:1px solid var(--border);
+        background:rgba(0,0,0,.35); color:inherit; font-family:inherit; font-size:.95rem;
+      }
+      .form-grid textarea {
+        padding: .7rem .85rem;
+        border-radius: .5rem;
+        border: 1px solid var(--border);
+        background: rgba(0,0,0,.35);
+        color: inherit;
+        font-family: inherit;
+        font-size: .95rem;
+        min-height: 100px;
+        resize: vertical;
+      }
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      .form-grid label.small-input {
+        max-width: 250px;
+        grid-column: span 1;
+    }
+
+      .pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.7rem; font-weight:600; }
+      .pill-cinema { background:rgba(212,175,55,.15); color:var(--gold); border:1px solid rgba(212,175,55,.35); }
+      .pill-locked { background:rgba(255,80,80,.12); color:#ff8585; border:1px solid rgba(255,80,80,.3); }
+      .resp-list { list-style:none; padding:0; margin:0; display:grid; gap:.6rem; }
+      .resp-list li { padding:.7rem .9rem; border:1px solid var(--border); border-radius:.5rem; background:rgba(255,255,255,.02); }
+      .resp-list li.no { color:#ff8585; border-color:rgba(255,80,80,.25); }
