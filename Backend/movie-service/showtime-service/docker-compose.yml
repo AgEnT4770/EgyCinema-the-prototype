@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  showtime-service:
+    build: .
+    container_name: showtime-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_URL: jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      DB_USER: admin
+      DB_PASS: ahmed01093908250
