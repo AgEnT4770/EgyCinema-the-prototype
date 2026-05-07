@@ -1,6 +1,8 @@
 package com.egycinema.showtime_service.Service;
 
 import com.egycinema.showtime_service.expcition.CustomException;
+import com.egycinema.showtime_service.repositry.Movie;
+import com.egycinema.showtime_service.repositry.MovieRepository;
 import com.egycinema.showtime_service.repositry.ShowTimeEntity;
 import com.egycinema.showtime_service.repositry.ShowTimeRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +16,24 @@ import java.util.Map;
 public class ShowTimeService {
     @Autowired
     private ShowTimeRepo repo;
+    @Autowired
+    private MovieRepository movieRepo;
     public ShowTimeEntity createShowtime(ShowTimeEntity showtime ) {
         if (showtime.getDateTime().isBefore(LocalDateTime.now())) {
             throw new CustomException("Cannot create showtime in the past");
         }
         showtime.setDate(showtime.getDateTime().toLocalDate());
         showtime.setTime(showtime.getDateTime().toLocalTime());
+        if (showtime.getMovie() == null || showtime.getMovie().getMovieID() == null) {
+            throw new CustomException("Movie is required");
+        }
+
+        Long movieId = showtime.getMovie().getMovieID();
+
+        Movie movie = movieRepo.findById(movieId)
+                .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+        showtime.setMovie(movie);
 
 
 
@@ -34,13 +48,21 @@ public class ShowTimeService {
         return repo.save(showtime);
     }
     public List<ShowTimeEntity> getAll() {
+        List<ShowTimeEntity> list = repo.findAll();
 
-        return repo.findAll();
+        // force initialize movie before JSON serialization
+        list.forEach(st -> {
+            if (st.getMovie() != null) {
+                st.getMovie().getMovieID(); // forces load
+            }
+        });
+
+        return list;
     }
 
     public List<ShowTimeEntity> getByMovie(Long movieId) {
 
-        return repo.findByMovieId(movieId);
+        return repo.findByMovie_MovieID(movieId);
     }
 
     public ShowTimeEntity update(Long id, ShowTimeEntity newData) {
@@ -64,7 +86,7 @@ public class ShowTimeService {
         return repo.findByCinemaId(cinemaId);
     }
     public List<ShowTimeEntity> getByMovieAndCinema(Long movieId, Long cinemaId) {
-        return repo.findByMovieIdAndCinemaId(movieId, cinemaId);
+        return repo.findByMovie_MovieIDAndCinemaId(movieId, cinemaId);
     }
 
 
@@ -82,7 +104,10 @@ public class ShowTimeService {
                     break;
 
                 case "movieId":
-                    existing.setMovieId(Long.valueOf(value.toString()));
+                    Movie movie = movieRepo.findById(Long.valueOf(value.toString()))
+                            .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+                    existing.setMovie(movie);
                     break;
 
                 case "hallId":
