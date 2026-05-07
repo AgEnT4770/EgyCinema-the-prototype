@@ -8,9 +8,9 @@ import java.util.List;
 
 @Repository
 public interface ShowTimeRepo extends JpaRepository<ShowTimeEntity,Long> {
-    List<ShowTimeEntity> findByMovieId(Long movieId);
+    List<ShowTimeEntity> findByMovie_MovieID(Long movieId);
     List<ShowTimeEntity> findByCinemaId(Long cinemaId);
-    List<ShowTimeEntity> findByMovieIdAndCinemaId(Long movieId, Long cinemaId);
+    List<ShowTimeEntity> findByMovie_MovieIDAndCinemaId(Long movieId, Long cinemaId);
     boolean existsByHallIdAndDateTime(Long hallId, LocalDateTime dateTime);
 
 

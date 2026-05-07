@@ -1,5 +1,6 @@
 package com.egycinema.showtime_service.repositry;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -22,8 +23,10 @@ public class ShowTimeEntity {
     private Long id;
     @NotNull
     private Long cinemaId;
-    @NotNull
-    private Long movieId;
+//    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MovieID") // FK column in DB
+    private Movie movie;
 
     @NotNull
     private Long hallId;
