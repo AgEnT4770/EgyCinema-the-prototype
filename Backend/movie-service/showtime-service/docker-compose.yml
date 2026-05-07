@@ -6,7 +6,19 @@ services:
     container_name: showtime-service
     ports:
       - "8083:8083"
+    env_file:
+      - .env
     environment:
-      DB_URL: jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
-      DB_USER: admin
-      DB_PASS: ahmed01093908250
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.SQLServerDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: us-east-1
+      AWS_BUCKET: project-cinema-images
+
+    restart: unless-stopped
