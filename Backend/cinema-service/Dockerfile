@@ -1,14 +1,14 @@
-# Use an official Java runtime as a parent image
-FROM eclipse-temurin:17-jdk-alpine
+# Step 1: Use a Java 25 runtime environment
+FROM eclipse-temurin:25-jdk-alpine
 
-# Set the working directory inside the container
+# Step 2: Set the working directory
 WORKDIR /app
 
-# Copy the jar file from the target folder
+# Step 3: Copy your jar (make sure you ran 'mvn package' first!)
 COPY target/*.jar app.jar
 
-# Expose the port your service runs on
+# Step 4: Open the port your app uses
 EXPOSE 8080
 
-# Command to run the application
+# Step 5: Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]
