@@ -36,16 +36,32 @@ const Auth = {
     localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
   },
 
-  async login(username, password){
-    const res = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-    });
-    if (!res.ok) throw new Error('Invalid credentials');
-    const token = await res.text();
-    sessionStorage.setItem('token', token);
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
+ async login(username, password){
+    try {
+        const res = await fetch('http://localhost:8080/api/auth/login', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json' // Tell Spring you want JSON back
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!res.ok) {
+            const errorMsg = await res.text();
+            throw new Error(errorMsg || 'Invalid credentials');
+        }
+
+        // IMPORTANT: If your backend returns a raw string token, 
+        // res.text() is correct. If it returns {"token": "..."}, use res.json()
+        const token = await res.text(); 
+        
+        sessionStorage.setItem('token', token);
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
+    } catch (err) {
+        console.error("Login Fetch Error:", err);
+        throw new Error('Server unreachable or connection refused');
+    }
   },
 
   logout(){ localStorage.removeItem(AUTH_KEY); },

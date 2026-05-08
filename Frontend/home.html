@@ -11,91 +11,150 @@
 </head>
 <body>
   <div id="header-slot"></div>
+  
   <main style="flex:1">
-    <section class="featured" id="featured"></section>
+    <section class="featured" id="featured">
+      <!-- Featured movie injected here -->
+    </section>
+
     <section id="cinemas" class="cinemas-section">
       <div class="container">
         <div class="intro">
           <div class="eyebrow">Cinemas across Egypt</div>
           <h2>Pick your screen, pick your story</h2>
         </div>
-        <div id="cinemaList"></div>
+        <div id="cinemaList">
+          <!-- Loading State -->
+          <p style="text-align: center; padding: 2rem; color: #888;">Fetching cinemas from server...</p>
+        </div>
       </div>
     </section>
   </main>
+
   <div id="footer-slot"></div>
 
+  <!-- Dependencies -->
   <script src="js/data.js"></script>
   <script src="js/common.js"></script>
+
   <script>
     mountChrome();
 
-    // Featured (first movie)
-    const f = MOVIES[0];
-    document.getElementById('featured').innerHTML = `
-      <img src="${f.backdrop || f.poster}" alt="${f.title}" />
-      <div class="container">
-        <div class="eyebrow">Featured</div>
-        <h1>${f.title}</h1>
-        <p>${f.description}</p>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-          <a class="btn btn-hero btn-lg" href="movie.html?id=${f.id}"><span class="icon">${ICONS.play}</span> Watch details</a>
-          ${favButtonHTML(f.id, {size:'lg'})}
-        </div>
-      </div>`;
-      
-    // Cinema rows with showtimes + booking
-    const list = document.getElementById('cinemaList');
-    list.innerHTML = CINEMAS.map(c => `
-      <div class="cinema-row">
-        <div class="head">
-          <div>
-            <h2>${c.name}</h2>
-            <div class="loc"><span class="icon">${ICONS.pin}</span>${c.location}</div>
-          </div>
-          <div class="divider"></div>
-        </div>
-        <div class="movie-grid">
-          ${c.movieIds.map(id => {
-            const m = getMovie(id); if(!m) return '';
-            const shows = getShowtimes(m.id, c.id);
-            return `
-              <div class="movie-card movie-card-grid">
-                <a href="movie.html?id=${m.id}" class="poster-link">
-                  <div class="poster">
-                    <span class="rating">${m.rating}</span>
-                    ${favButtonHTML(m.id)}
-                    <img src="${m.poster}" alt="${m.title} poster" loading="lazy" />
+    // 1. Handle the Featured Movie (using your existing data.js for now)
+    function renderFeatured() {
+        const f = MOVIES[0];
+        if (!f) return;
+        document.getElementById('featured').innerHTML = `
+          <img src="${f.backdrop || f.poster}" alt="${f.title}" />
+          <div class="container">
+            <div class="eyebrow">Featured</div>
+            <h1>${f.title}</h1>
+            <p>${f.description}</p>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+              <a class="btn btn-hero btn-lg" href="movie.html?id=${f.id}"><span class="icon">${ICONS.play}</span> Watch details</a>
+              ${favButtonHTML(f.id, {size:'lg'})}
+            </div>
+          </div>`;
+    }
+
+    // 2. Fetch Cinemas from Backend
+    async function loadCinemas() {
+        const listContainer = document.getElementById('cinemaList');
+        
+        try {
+            // Note: Matching your @RequestMapping("/api/Cinemas") case sensitivity
+            const response = await fetch('http://localhost:8080/api/Cinemas');
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const cinemas = await response.json();
+            
+            if (cinemas.length === 0) {
+                listContainer.innerHTML = "<p>No cinemas found in the database.</p>";
+                return;
+            }
+
+            // Render the fetched cinemas
+            listContainer.innerHTML = cinemas.map(c => renderCinemaRow(c)).join('');
+
+        } catch (error) {
+            console.error("Backend connection failed:", error);
+            listContainer.innerHTML = `
+                <div style="background: rgba(255,0,0,0.1); padding: 2rem; border-radius: 8px; text-align: center;">
+                    <p style="color: #ff6b6b;">Error connecting to Cinema Service at localhost:8080</p>
+                    <small style="color: #888;">Check if your Spring Boot Application is running.</small>
+                </div>`;
+        }
+    }
+
+    // 3. Helper to build the Cinema HTML Row
+    function renderCinemaRow(c) {
+        // Since we are moving from static to dynamic, we check if the cinema has movieIds.
+        // If your DB Cinema entity doesn't have movieIds yet, we'll show a "Coming Soon" message.
+        const moviesHtml = (c.movieIds && c.movieIds.length > 0) 
+            ? c.movieIds.map(id => renderMovieCard(id, c.id)).join('')
+            : `<p style="grid-column: 1/-1; padding: 2rem; color: #666; text-align: center;">
+                No movies currently scheduled for this branch.
+               </p>`;
+
+        return `
+          <div class="cinema-row">
+            <div class="head">
+              <div>
+                <h2>${c.name}</h2>
+                <div class="loc"><span class="icon">${ICONS.pin}</span>${c.location || 'Egypt'}</div>
+              </div>
+              <div class="divider"></div>
+            </div>
+            <div class="movie-grid">
+              ${moviesHtml}
+            </div>
+          </div>`;
+    }
+
+    // 4. Helper for Movie Cards (reused from your original logic)
+    function renderMovieCard(movieId, cinemaId) {
+        const m = getMovie(movieId); 
+        if(!m) return '';
+        const shows = getShowtimes(m.id, cinemaId);
+
+        return `
+          <div class="movie-card movie-card-grid">
+            <a href="movie.html?id=${m.id}" class="poster-link">
+              <div class="poster">
+                <span class="rating">${m.rating}</span>
+                ${favButtonHTML(m.id)}
+                <img src="${m.poster}" alt="${m.title} poster" loading="lazy" />
+              </div>
+              <h3>${m.title}</h3>
+              <div class="movie-meta">
+                <span>${ICONS.clock}${m.duration}</span>
+                <span><span class="star">${ICONS.star}</span>${m.year}</span>
+              </div>
+            </a>
+            <div class="showtimes">
+              ${shows.map(d => `
+                <div class="show-day">
+                  <div class="show-date"><span class="icon">${ICONS.cal}</span>${d.label}</div>
+                  <div class="show-times">
+                    ${d.times.map(t => `
+                      <button type="button" class="time-chip" 
+                        onclick="bookTicket('${m.id}', '${cinemaId}', ${JSON.stringify(d.label)}, '${t}')">
+                        ${t}
+                      </button>`).join('')}
                   </div>
-                  <h3>${m.title}</h3>
-                  <div class="movie-meta">
-                    <span>${ICONS.clock}${m.duration}</span>
-                    <span><span class="star">${ICONS.star}</span>${m.year}</span>
-                  </div>
-                </a>
-                <div class="showtimes">
-  ${shows.map(d => `
-    <div class="show-day">
-      <div class="show-date">
-        <span class="icon">${ICONS.cal}</span>${d.label}
-      </div>
-      <div class="show-times">
-        ${d.times.map(t => `
-          <button type="button" class="time-chip"
-            onclick="bookTicket('${m.id}', '${c.id}', ${JSON.stringify(d.label)}, '${t}')">
-            ${t}
-          </button>`).join('')}
-      </div>
-    </div>`).join('')}
-</div>
-                <button type="button" class="btn btn-hero btn-sm book-btn"
-                  onclick="bookTicket('${m.id}', '${c.id}', 'Today', '${shows[0].times[0]}')">
-                  <span class="icon">${ICONS.ticket}</span> Book ticket
-                </button>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>`).join('');
+                </div>`).join('')}
+            </div>
+            <button type="button" class="btn btn-hero btn-sm book-btn"
+              onclick="bookTicket('${m.id}', '${cinemaId}', 'Today', '${shows[0]?.times[0] || 'N/A'}')">
+              <span class="icon">${ICONS.ticket}</span> Book ticket
+            </button>
+          </div>`;
+    }
+
+    // Initialize Page
+    renderFeatured();
+    loadCinemas();
   </script>
 </body>
 </html>

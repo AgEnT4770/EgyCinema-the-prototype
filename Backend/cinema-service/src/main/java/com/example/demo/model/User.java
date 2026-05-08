@@ -15,16 +15,21 @@ import lombok.Setter;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto increments an ID for each new user
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userid")
-    private Long id;
-    @Column(unique = true, nullable = false) // Username must be unique and not empty or null
-    private String username;
-    @Column(nullable = false) // Password must not be empty or null
-    private String passwordHash; // Stores the hashed password from UserAuth
-    @Column(nullable = false) // Salt must not be empty or null
-    private String salt; // Stores the B64-encoded salt used for hashing the password
-    @Column(nullable = false) // Role must not be empty or null
-    private String role; // Stores the user role
+    private Integer id; // Ensure this is Integer for 'int identity'
 
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    // Try mapping explicitly to lowercase 'passwordhash' 
+    // or simply 'password' if that's what is in your SQL table
+    @Column(name = "password_hash", nullable = false) 
+    private String passwordHash;
+
+    @Column(nullable = false)
+    private String salt;
+
+    @Column(nullable = false)
+    private String role;
 }

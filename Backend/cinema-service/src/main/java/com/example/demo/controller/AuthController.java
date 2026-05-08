@@ -35,14 +35,16 @@ public class AuthController {
         }
     }
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String>body) {
-        String username = body.get("username"); // Extracts the username from the request body
-        String password = body.get("password"); // Extracts the password from the request body
-        String token = authService.loginUser(username, password); // Calls the AuthService to log in the user
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
+        String token = authService.loginUser(username, password);
+        
         if (token != null) {
-            return ResponseEntity.ok(token); // Returns a success response if login is successful
+            // Returning a Map automatically converts to JSON: {"token": "..."}
+            return ResponseEntity.ok(Map.of("token", token));
         } else {
-            return ResponseEntity.status(401).body("Invalid credentials"); // Returns an error response if the credentials are invalid
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
     }
 }
