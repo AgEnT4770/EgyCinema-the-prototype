@@ -58,11 +58,13 @@
     <script src="js/common.js"></script>
     <script>
         async function fetchUsers() {
-            const token = sessionStorage.getItem('token');
+           const token = sessionStorage.getItem('token');
             const tbody = document.getElementById('user-table-body');
             
             // Get current logged in username from token
+            
             const payload = JSON.parse(atob(token.split('.')[1]));
+            const userRole = payload.role;
             const currentUser = payload.sub;
             
             try {

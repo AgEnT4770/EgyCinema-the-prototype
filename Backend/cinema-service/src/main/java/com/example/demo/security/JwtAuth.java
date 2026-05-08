@@ -1,52 +1,56 @@
 package com.example.demo.security;
 
 import java.util.Date;
-
 import javax.crypto.SecretKey;
-
 import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 @Component
 public class JwtAuth {
-    private static final long EXPIRATION_TIME = 86400000; // Expires in 24 hours
-    private final SecretKey key = Jwts.SIG.HS256.key().build(); // Generate a secure random key for signing JWTs
-    
-    public String generateToken(String username, String role) {
-        return Jwts.builder() // Create a new JWT token builder
-                .subject(username) // Set the username as the subject of the token
-                .claim("roles", role) // Add specific user role as claim in the token
-                .issuedAt(new Date()) // Set the token issuance time
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // Set expiration for the token
-                .signWith(key) // Sign the token with the generated key
-                .compact(); // Build the JWT and serialize
-    }
+    private static final long EXPIRATION_TIME = 86400000; // 24 hours
+    private final SecretKey key = Jwts.SIG.HS256.key().build(); 
 
+    public String generateToken(String username, String role) {
+    String formattedRole = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+
+    return Jwts.builder()
+            .subject(username)
+            .claim("role", formattedRole) // Singular 'role'
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+            .signWith(key)
+            .compact();
+}
     public Claims extractClaims(String token) {
         return Jwts.parser()
-                .verifyWith(key) // Set the signing key for validating token
+                .verifyWith(key)
                 .build()
-                .parseSignedClaims(token) // Parse and validate signature of token
-                .getPayload(); // Extract the claims from the token
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String extractUsername(String token) {
-        return extractClaims(token).getSubject(); // Extract the username from the token claims
+        return extractClaims(token).getSubject();
     }
 
-    public String extractRole(String token) {
-        return extractClaims(token).get("roles", String.class); // Extract the user role from the token claims
+    // Inside JwtAuth.java
+public String extractRole(String token) {
+    Claims claims = extractClaims(token);
+    // Look for singular 'role' first, then plural 'roles' as a backup
+    String role = claims.get("role", String.class);
+    if (role == null) {
+        role = claims.get("roles", String.class);
     }
+    return role;
+}
 
     public boolean isTokenValid(String token) {
         try {
-            extractClaims(token); // Attempt to extract claims to validate token
-            return true; // If extraction is successful, token is valid
-            
+            Claims claims = extractClaims(token);
+            return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
-            return false; // If any exception occurs during extraction, token is invalid
+            return false;
         }
     }
 }

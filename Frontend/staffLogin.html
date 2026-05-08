@@ -80,7 +80,7 @@
         // Decode token to check role
         const token = sessionStorage.getItem('token');
         const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.roles;
+        const userRole = payload.role;
 
         // if(role === 'admin' && userRole !== 'ROLE_ADMIN') {
         //   btn.disabled = false;

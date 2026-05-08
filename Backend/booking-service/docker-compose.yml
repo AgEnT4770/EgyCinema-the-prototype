@@ -1,0 +1,20 @@
+booking-service:
+    # 1. Path to Faisal's folder
+    build: ./Backend/booking-service 
+    container_name: booking-backend
+    
+    # 2. Port mapping: [Laptop Port 8082] -> [Container Port 8080]
+    ports:
+      - "8082:8080"
+    
+    # 3. Pulls the same cloud secrets as Adham and Ghaidaa
+    env_file:
+      - .env
+    
+    # 4. Shared Cloud DB Configuration
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=60000

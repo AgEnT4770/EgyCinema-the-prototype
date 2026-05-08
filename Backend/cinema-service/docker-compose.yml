@@ -1,9 +1,27 @@
-services:
-  db:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: cinemadb
+cinema-service:
+    # 1. Build context: points to the folder containing your Dockerfile
+    build: ./Backend/cinema-service 
+    container_name: cinema-backend
+    
+    # 2. Port mapping: [Your Laptop Port] : [Container Port]
     ports:
-      - "5432:5432"
+      - "8080:8080"
+    
+    # 3. Pulls sensitive credentials from your .env file
+    env_file:
+      - .env 
+    
+    # 4. Spring Boot Configuration
+    environment:
+      # Connects directly to Ghaidaa's AWS RDS instance
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      
+      # Maps variables from your .env file to Spring properties
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      
+      # Automatically syncs your Java entities with the Cloud DB tables
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      
+      # Gives the cloud connection extra time to establish during startup
+      - SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=60000

@@ -1,0 +1,56 @@
+services:
+  # 1. Adham's Backend (Cinema)
+  cinema-service:
+    build: ./Backend/cinema-service
+    container_name: cinema-backend
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  # 2. Faisal's Backend (Booking)
+  booking-service:
+    build: ./Backend/booking-service
+    container_name: booking-backend
+    ports:
+      - "8082:8080" 
+    env_file: .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  # 3. Ghaidaa's Backend (Showtime)
+  showtime-service:
+    build: ./Backend/showtime-service
+    container_name: showtime-backend
+    ports:
+      - "8083:8083"
+    env_file: .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.SQLServerDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - AWS_REGION=us-east-1
+      - AWS_BUCKET=project-cinema-images
+    restart: unless-stopped
+
+  # 4. Adham's Frontend
+  frontend:
+    image: nginx:alpine
+    container_name: cinema-frontend
+    ports:
+      - "5500:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+    - cinema-service
+    - booking-service
+    - showtime-service
