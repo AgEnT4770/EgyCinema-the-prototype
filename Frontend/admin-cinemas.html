@@ -6,7 +6,63 @@
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Security Guard: Redirect non-admins before page even renders -->
+    <style>
+        /* 1. CUSTOM CINEMA SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #c5a02c; }
+        html { scroll-behavior: smooth; }
+
+        /* 2. STICKY HEADER & SCROLLABLE PANEL */
+        .admin-panel {
+            max-height: 75vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .admin-table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #121212; /* Matches panel bg */
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* 3. HOVER EFFECTS */
+        .admin-table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+        .admin-table tbody tr:hover {
+            background-color: rgba(212, 175, 55, 0.08);
+        }
+        .btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 4. BACK TO TOP BUTTON */
+        #backToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: none; 
+            z-index: 100;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            background: var(--gold);
+            color: black;
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+    </style>
+
+    <!-- Security Guard -->
     <script>
         (function protectAdminPage() {
             const token = sessionStorage.getItem('token');
@@ -27,6 +83,7 @@
         })();
     </script>
 </head>
+
 <body class="cinema-bg">
     <div class="admin-layout">
         <aside class="admin-sidebar">
@@ -55,7 +112,7 @@
                 <div class="admin-panel">
                     <table class="admin-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
-                            <tr style="text-align: left; border-bottom: 1px solid var(--border); color: var(--gold);">
+                            <tr style="text-align: left; color: var(--gold);">
                                 <th style="padding: 1rem;">Location Name</th>
                                 <th style="padding: 1rem;">Halls</th>
                                 <th style="padding: 1rem;">Address</th>
@@ -63,7 +120,6 @@
                             </tr>
                         </thead>
                         <tbody id="cinema-list">
-                            <!-- Data injected by JavaScript -->
                             <tr><td colspan="4" style="text-align:center; padding:2rem;">Loading locations...</td></tr>
                         </tbody>
                     </table>
@@ -72,9 +128,10 @@
         </main>
     </div>
 
-    <!-- common.js for toast() and other helpers -->
-    <script src="js/common.js"></script>
+    <!-- Floating UI Elements -->
+    <button id="backToTop" title="Go to top">↑</button>
 
+    <script src="js/common.js"></script>
     <script>
         const API_URL = 'http://localhost:8080/api/Cinemas';
 
@@ -82,43 +139,48 @@
          * 1. FETCH & RENDER
          */
         async function fetchCinemas() {
-    try {
-        const response = await fetch(API_URL);
-        const cinemas = await response.json();
-        const list = document.getElementById('cinema-list');
-        list.innerHTML = '';
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Failed to fetch");
+                const cinemas = await response.json();
+                const list = document.getElementById('cinema-list');
+                list.innerHTML = '';
 
-        cinemas.forEach(cinema => {
-            // Use the new virtual property from Java
-            const hallCount = cinema.totalHalls || 0; 
-            
-            const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid var(--border)';
-            row.innerHTML = `
-                <td style="padding: 1.5rem 1rem; font-weight: 600;">${cinema.name}</td>
-                <td style="padding: 1rem;">
-                    <span class="badge" style="background: var(--gold-soft); color: var(--gold); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">
-                        ${hallCount} Halls
-                    </span>
-                </td>
-                <td style="padding: 1rem;" class="text-muted">${cinema.location || 'N/A'}</td>
-                <td style="padding: 1rem; text-align: right;">
-                    <button class="btn btn-outline btn-sm" onclick="editCinema(${cinema.id}, '${cinema.name}', '${cinema.location}')">Edit</button>
-                    <button class="btn btn-outline btn-sm" style="color: var(--primary);" onclick="deleteCinema(${cinema.id})">Delete</button>
-                </td>
-            `;
-            list.appendChild(row);
-        });
-    } catch (err) {
-        toast("Error loading cinemas", "error");
-    }
-}
+                if (cinemas.length === 0) {
+                    list.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem;">No locations found.</td></tr>';
+                    return;
+                }
+
+                cinemas.forEach(cinema => {
+                    const hallCount = cinema.totalHalls || 0; 
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid var(--border)';
+                    row.innerHTML = `
+                        <td style="padding: 1.5rem 1rem; font-weight: 600;">${cinema.name}</td>
+                        <td style="padding: 1rem;">
+                            <span class="badge" style="background: rgba(212, 175, 55, 0.15); color: var(--gold); padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(212, 175, 55, 0.3);">
+                                ${hallCount} Halls
+                            </span>
+                        </td>
+                        <td style="padding: 1rem;" class="text-muted">${cinema.location || 'N/A'}</td>
+                        <td style="padding: 1rem; text-align: right;">
+                            <button class="btn btn-outline btn-sm" onclick="editCinema(${cinema.id}, '${cinema.name}', '${cinema.location}')">Edit</button>
+                            <button class="btn btn-outline btn-sm" style="color: var(--primary);" onclick="deleteCinema(${cinema.id})">Delete</button>
+                        </td>
+                    `;
+                    list.appendChild(row);
+                });
+            } catch (err) {
+                toast("Error loading cinemas", "error");
+            }
+        }
+
         /**
          * 2. ADD NEW LOCATION
          */
         async function addLocation() {
             const name = prompt("Enter Cinema Name:");
-            const location = prompt("Enter Address (e.g. Heliopolis, Cairo):");
+            const location = prompt("Enter Address:");
             if (!name || !location) return;
 
             try {
@@ -131,12 +193,8 @@
                 if (response.ok) {
                     toast("Location added successfully!");
                     fetchCinemas();
-                } else {
-                    throw new Error("Failed to add location");
                 }
-            } catch (err) {
-                toast(err.message, "error");
-            }
+            } catch (err) { toast(err.message, "error"); }
         }
 
         /**
@@ -157,12 +215,8 @@
                 if (response.ok) {
                     toast("Location updated!");
                     fetchCinemas();
-                } else {
-                    throw new Error("Failed to update");
                 }
-            } catch (err) {
-                toast(err.message, "error");
-            }
+            } catch (err) { toast(err.message, "error"); }
         }
 
         /**
@@ -176,15 +230,25 @@
                 if (response.ok) {
                     toast("Location deleted");
                     fetchCinemas();
-                } else {
-                    throw new Error("Could not delete location");
                 }
-            } catch (err) {
-                toast(err.message, "error");
-            }
+            } catch (err) { toast(err.message, "error"); }
         }
 
-        // Initialize on load
+        /**
+         * 5. SCROLL CONTROLS
+         */
+        const topBtn = document.getElementById("backToTop");
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                topBtn.style.display = "block";
+            } else {
+                topBtn.style.display = "none";
+            }
+        };
+        topBtn.onclick = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         document.addEventListener('DOMContentLoaded', fetchCinemas);
     </script>
 </body>

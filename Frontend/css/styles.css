@@ -546,3 +546,42 @@ input{font:inherit}
       .resp-list { list-style:none; padding:0; margin:0; display:grid; gap:.6rem; }
       .resp-list li { padding:.7rem .9rem; border:1px solid var(--border); border-radius:.5rem; background:rgba(255,255,255,.02); }
       .resp-list li.no { color:#ff8585; border-color:rgba(255,80,80,.25); }
+
+      ::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* The track (background) */
+::-webkit-scrollbar-track {
+    background: #1a1a1a; 
+}
+
+/* The thumb (the part you drag) */
+::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
+
+/* Hover effect on the thumb */
+::-webkit-scrollbar-thumb:hover {
+    background: #c5a02c; /* A slightly darker gold */
+}
+
+/* Ensure smooth scrolling when clicking links */
+html {
+    scroll-behavior: smooth;
+}
+/* This makes the <thead> stay at the top */
+.admin-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #121212; /* Matches your panel background */
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5); /* Adds a shadow so it looks elevated */
+}
+
+/* Ensure the panel itself handles overflow if needed */
+.admin-panel {
+    max-height: 70vh; /* Adjust this height as you like */
+    overflow-y: auto;
+}

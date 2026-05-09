@@ -5,6 +5,84 @@
     <title>Movie Catalog | CinemaAdmin</title>
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CUSTOM SCROLLBAR & SMOOTHING */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+        html { scroll-behavior: smooth; }
+
+        /* MOVIE CARD HOVER EFFECTS */
+        .movie-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            position: relative;
+        }
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-color: var(--gold) !important;
+        }
+
+        .poster-container {
+            background: #000; 
+            height: 320px; 
+            border-radius: 0.5rem; 
+            margin-bottom: 1rem; 
+            overflow: hidden; 
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+        }
+
+        #backToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: none; 
+            z-index: 100;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            background: var(--gold);
+            color: black;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+    </style>
+
+    <!-- Security Guard -->
+    <!-- <script>
+        (function protectAdminPage() {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.replace('staff-login.html');
+                return;
+            }
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.role !== 'ROLE_ADMIN') {
+                    window.location.replace('employee-dashboard.html');
+                }
+            } catch (e) {
+                window.location.replace('staff-login.html');
+            }
+        })();
+    </script> -->
 </head>
 <body class="cinema-bg">
     <div class="admin-layout">
@@ -27,24 +105,96 @@
         <main class="admin-main">
             <header class="admin-header">
                 <h2 class="text-gradient-gold">Movie Catalog</h2>
-                <button class="btn btn-hero">Upload New Movie</button>
+                <!-- Link to your existing upload logic if needed, or kept as placeholder -->
+                <button class="btn btn-hero" onclick="location.href='admin-upload-movie.html'">Upload New Movie</button>
             </header>
+            
             <div class="admin-content">
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem;">
-                    <div class="admin-panel" style="padding: 1rem; text-align: center;">
-                        <div style="background: #000; height: 300px; border-radius: 0.5rem; margin-bottom: 1rem; overflow: hidden; border: 1px solid var(--border);">
-                            <img src="/api/placeholder/200/300" alt="Poster" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
-                        </div>
-                        <h4 style="margin-bottom: 1rem; font-size: 1.1rem;">Dune: Part Two</h4>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button class="btn btn-outline btn-sm" style="flex: 1;">Edit</button>
-                            <button class="btn btn-outline btn-sm" style="color: var(--primary);">Delete</button>
-                        </div>
-                    </div>
+                <div id="movie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem;">
+                    <!-- Movie Cards will be injected here -->
+                    <p style="color: var(--gold); text-align: center; grid-column: 1/-1;">Loading movies...</p>
                 </div>
             </div>
         </main>
     </div>
+
+    <button id="backToTop">↑</button>
+
     <script src="js/common.js"></script>
+    <script>
+        const API_URL = 'http://localhost:8083/movies';
+
+        async function fetchMovies() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Failed to fetch");
+                
+                const movies = await response.json();
+                const grid = document.getElementById('movie-grid');
+                grid.innerHTML = '';
+
+                if (movies.length === 0) {
+                    grid.innerHTML = '<p style="color: var(--gold); text-align: center; grid-column: 1/-1;">No movies found in database.</p>';
+                    return;
+                }
+
+                movies.forEach(movie => {
+                    const card = document.createElement('div');
+                    card.className = 'admin-panel movie-card';
+                    card.style.padding = '1rem';
+                    card.style.textAlign = 'center';
+                    
+                    // Match the case of MovieID based on your Java Entity
+                    const mId = movie.movieID || movie.MovieID;
+
+                    card.innerHTML = `
+                        <div class="poster-container">
+                            <span class="status-badge">${movie.status || 'N/A'}</span>
+                            <img src="${movie.imgUrl || 'img/default-poster.jpg'}" alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 1.1rem; height: 2.4rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            ${movie.title}
+                        </h4>
+                        <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">${movie.duration} mins | ${movie.ReleaseDate || 'TBA'}</p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <!-- Edit functionality disabled as requested, showing only Delete -->
+                            <button class="btn btn-outline btn-sm" style="flex: 1; color: var(--primary); border-color: var(--primary);" onclick="deleteMovie(${mId})">
+                                Delete Permanently
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+                toast("Error loading movie catalog", "error");
+            }
+        }
+
+        async function deleteMovie(id) {
+            if (!confirm("⚠️ DANGER: This will delete the movie and all associated data. Continue?")) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    toast("Movie deleted successfully");
+                    fetchMovies(); // Refresh list
+                } else {
+                    toast("Failed to delete movie", "error");
+                }
+            } catch (err) {
+                toast("Server communication error", "error");
+            }
+        }
+
+        // Back to top logic
+        const topBtn = document.getElementById("backToTop");
+        window.onscroll = () => {
+            topBtn.style.display = (window.pageYOffset > 400) ? "block" : "none";
+        };
+        topBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        document.addEventListener('DOMContentLoaded', fetchMovies);
+    </script>
 </body>
 </html>

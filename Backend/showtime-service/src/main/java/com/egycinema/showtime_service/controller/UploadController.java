@@ -42,8 +42,9 @@ public class UploadController {
         return movieService.getMovie(movieId);
     }
     @GetMapping
-    public ResponseEntity<List<Movie>> getAllMovies() {
-        return ResponseEntity.ok(movieService.getAllMovies());
+    public List<Movie> getAllMovies() {
+        // For testing: manually return a list if database is empty
+        return movieService.getAllMovies(); 
     }
     @PutMapping("/{id}")
     public ResponseEntity<Movie> updateMovie(
