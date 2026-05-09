@@ -33,26 +33,26 @@ public class ShowTimesController {
         return service.getAll();
     }
 
-//    @GetMapping("/movie/{movieId}")
-//    public List<ShowTimeEntity> getByMovie(@PathVariable Long movieId) {
-//
-//        return service.getByMovie(movieId);
-//    }
-//
-//    @GetMapping("/cinema/{cinemaId}")
-//    public List<ShowTimeEntity> getByCinema(@PathVariable Long cinemaId) {
-//
-//        return service.getByCinema(cinemaId);
-//    }
-//    @GetMapping("/movie/{movieId}/cinema/{cinemaId}")
-//    public List<ShowTimeEntity> getByMovieAndCinema(
-//            @PathVariable Long movieId,
-//            @PathVariable Long cinemaId
-//    ) {
-//        return service.getByMovieAndCinema(movieId, cinemaId);
-//    }
+   @GetMapping("/movie/{movieId}")
+   public List<ShowTimeEntity> getByMovie(@PathVariable Long movieId) {
+
+       return service.getByMovie(movieId);
+   }
+
+   @GetMapping("/cinema/{cinemaId}")
+   public List<ShowTimeEntity> getByCinema(@PathVariable Long cinemaId) {
+
+       return service.getByCinema(cinemaId);
+   }
+   @GetMapping("/movie/{movieId}/cinema/{cinemaId}")
+   public List<ShowTimeEntity> getByMovieAndCinema(
+           @PathVariable Long movieId,
+           @PathVariable Long cinemaId
+   ) {
+       return service.getByMovieAndCinema(movieId, cinemaId);
+   }
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+   
     public String delete(@PathVariable Long id) {
         service.delete(id);
         return "Deleted successfully";

@@ -31,13 +31,16 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Use the explicit Bean below
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all pre-flights
-                .requestMatchers("/api/auth/**").permitAll() 
-                .requestMatchers("/api/Cinemas/**").permitAll()
-                .requestMatchers("/api/cinemas/**").permitAll() // Add lowercase version
-                .requestMatchers("/api/admin/**").permitAll() // Temporarily allow all admin endpoints for testing
-                .anyRequest().authenticated()
-            )
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/Cinemas/**").permitAll()
+    // STRICT ADMIN LOCKDOWN:
+            .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+    // If you have employee-specific endpoints:
+            .requestMatchers("/api/employee/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_EMPLOYEE")
+    // Everything else requires at least being logged in
+            .anyRequest().authenticated()
+)
             .addFilterBefore(new JwtFilter(jwtAuth), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

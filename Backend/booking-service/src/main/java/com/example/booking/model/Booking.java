@@ -10,13 +10,18 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BookingID")
-    private Long id;
+    private Integer id;
 
-    @Column(name = "UserID", nullable = false)
+    @Column(name = "userid", nullable = false)
     private Long userId;
 
+    // ده فعليًا Showtime ID
     @Column(name = "ShowID", nullable = false)
-    private Long showtimeId;
+    private Integer showtimeId;
+
+    // Movie FK
+    @Column(name = "MovieID", nullable = false)
+    private Integer movieId;
 
     @Column(name = "SeatsCount", nullable = false)
     private int seats;
@@ -26,28 +31,63 @@ public class Booking {
 
     public Booking() {}
 
-    // 🔹 Auto set date لو مش متبعت
     @PrePersist
     public void prePersist() {
+
         if (bookingDate == null) {
             bookingDate = LocalDateTime.now();
         }
     }
 
-    // 🔹 Getters & Setters (كاملين)
+    // =========================
+    // Getters & Setters
+    // =========================
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() {
+        return id;
+    }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public Long getShowtimeId() { return showtimeId; }
-    public void setShowtimeId(Long showtimeId) { this.showtimeId = showtimeId; }
+    public Long getUserId() {
+        return userId;
+    }
 
-    public int getSeats() { return seats; }
-    public void setSeats(int seats) { this.seats = seats; }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-    public LocalDateTime getBookingDate() { return bookingDate; }
-    public void setBookingDate(LocalDateTime bookingDate) { this.bookingDate = bookingDate; }
+    public Integer getShowtimeId() {
+        return showtimeId;
+    }
+
+    public void setShowtimeId(Integer showtimeId) {
+        this.showtimeId = showtimeId;
+    }
+
+    public Integer getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(Integer movieId) {
+        this.movieId = movieId;
+    }
+
+    public int getSeats() {
+        return seats;
+    }
+
+    public void setSeats(int seats) {
+        this.seats = seats;
+    }
+
+    public LocalDateTime getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(LocalDateTime bookingDate) {
+        this.bookingDate = bookingDate;
+    }
 }

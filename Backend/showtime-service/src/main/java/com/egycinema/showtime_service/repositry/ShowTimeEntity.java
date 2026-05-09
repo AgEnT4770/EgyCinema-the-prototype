@@ -23,10 +23,8 @@ public class ShowTimeEntity {
     private Long id;
     @NotNull
     private Long cinemaId;
-//    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MovieID") // FK column in DB
-    private Movie movie;
+    @Column(name = "MovieID")
+    private Long movieId;
 
     @NotNull
     private Long hallId;
@@ -43,8 +41,4 @@ public class ShowTimeEntity {
     @Positive
     private Double price;
 
-//    for booking seat
-//    private List<Integer> SeatID;
-//
-//    private boolean isAvailable;
 }

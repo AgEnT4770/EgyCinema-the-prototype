@@ -75,30 +75,40 @@
       btn.textContent = 'Logging in...';
 
       try {
-        await Auth.login(username, password);
-        
-        // Decode token to check role
-        const token = sessionStorage.getItem('token');
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role;
+  await Auth.login(username, password);
+  
+  // Decode token to check role
+  const token = sessionStorage.getItem('token');
+  if (!token) throw new Error('Authentication failed. No token received.');
+  
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const userRole = payload.role;
 
-        // if(role === 'admin' && userRole !== 'ROLE_ADMIN') {
-        //   btn.disabled = false;
-        //   btn.style.cursor = 'pointer';
-        //   btn.textContent = 'Log in';
-        //   return toast('Access denied. You are not an admin.', 'error');
-        // }
+  // 1. Check if they selected Admin but don't have the Admin role
+  if (role === 'admin' && userRole !== 'ROLE_ADMIN') {
+    btn.disabled = false;
+    btn.style.cursor = 'pointer';
+    btn.textContent = 'Log in';
+    return toast('Access denied. You are not an admin.', 'error');
+  }
 
-        // toast('Welcome!');
-        // setTimeout(() => {
-        //   location.href = 'admin-dashboard.html';
-        // }, 500);
+  // 2. Check if they selected Employee but aren't an Employee or Admin
+  // (Assuming your normal users have 'ROLE_USER' or similar)
+  if (role === 'employee' && userRole !== 'ROLE_EMPLOYEE' && userRole !== 'ROLE_ADMIN') {
+    btn.disabled = false;
+    btn.style.cursor = 'pointer';
+    btn.textContent = 'Log in';
+    return toast('Access denied. You are not authorized staff.', 'error');
+  }
 
-        toast('Welcome!');
-        const dest = role === 'employee' ? 'employee-dashboard.html' : 'admin-dashboard.html';
-        setTimeout(() => { location.href = dest; }, 500);
+  // 3. Clean Redirection
+  toast('Welcome!');
+  const dest = role === 'employee' ? 'employee-dashboard.html' : 'admin-dashboard.html';
+  setTimeout(() => { 
+    location.href = dest; 
+  }, 500);
 
-      } catch(err) {
+} catch(err) {
         toast(err.message, 'error');
         btn.disabled = false;
         btn.style.cursor = 'pointer';

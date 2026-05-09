@@ -1,7 +1,7 @@
-package com.example.paymentservice.controller;
+package com.example.payment_service.controller;
 
-import com.example.paymentservice.model.Payment;
-import com.example.paymentservice.service.PaymentService;
+import com.example.payment_service.model.Payment;
+import com.example.payment_service.service.PaymentService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

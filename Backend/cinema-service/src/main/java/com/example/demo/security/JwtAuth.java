@@ -40,7 +40,7 @@ public String extractRole(String token) {
     // Look for singular 'role' first, then plural 'roles' as a backup
     String role = claims.get("role", String.class);
     if (role == null) {
-        role = claims.get("roles", String.class);
+        role = claims.get("role", String.class);
     }
     return role;
 }

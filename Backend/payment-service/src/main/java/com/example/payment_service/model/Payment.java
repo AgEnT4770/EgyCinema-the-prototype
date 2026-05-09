@@ -1,4 +1,4 @@
-package com.example.paymentservice.model;
+package com.example.payment_service.model;
 
 import jakarta.persistence.*;
 
@@ -13,10 +13,10 @@ public class Payment {
     @Column(name = "PaymentID")
     private Long id;
 
-    @Column(name = "BookingID")
-    private Long bookingId;
+    @Column(name = "BookingID", nullable = false)
+    private Integer bookingId;
 
-    @Column(name = "Amount")
+    @Column(name = "Amount", nullable = false)
     private double amount;
 
     @Column(name = "Status")
@@ -33,15 +33,31 @@ public class Payment {
 
     public Payment() {}
 
+    @PrePersist
+    public void prePersist() {
+
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (status == null) {
+            status = "PAID";
+        }
+    }
+
+    // =========================
+    // Getters & Setters
+    // =========================
+
     public Long getId() {
         return id;
     }
 
-    public Long getBookingId() {
+    public Integer getBookingId() {
         return bookingId;
     }
 
-    public void setBookingId(Long bookingId) {
+    public void setBookingId(Integer bookingId) {
         this.bookingId = bookingId;
     }
 

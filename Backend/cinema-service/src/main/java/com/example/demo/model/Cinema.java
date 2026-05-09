@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 @Table(name = "Cinemas")
 @Data 
@@ -19,7 +21,12 @@ private Integer id;
     @Column(name = "Location") 
     private String location;
 
-    @OneToMany(mappedBy = "cinema", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cinema", cascade = CascadeType.ALL, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Hall> halls;
+
+    @JsonProperty("totalHalls")
+    public int getTotalHalls() {
+    return halls != null ? halls.size() : 0;
+    }
 }

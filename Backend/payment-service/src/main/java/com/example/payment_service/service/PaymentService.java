@@ -1,7 +1,7 @@
-package com.example.paymentservice.service;
+package com.example.payment_service.service;
 
-import com.example.paymentservice.model.Payment;
-import com.example.paymentservice.repository.PaymentRepository;
+import com.example.payment_service.model.Payment;
+import com.example.payment_service.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
