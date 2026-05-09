@@ -30,7 +30,7 @@ services:
     build: ./Backend/showtime-service
     container_name: showtime-backend
     ports:
-      - "8083:8083"
+      - "8083:8080"
     env_file: .env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
@@ -54,3 +54,18 @@ services:
     - cinema-service
     - booking-service
     - showtime-service
+
+  # 5. Faisal's Backend (Payment)
+  payment-service:
+    build: ./Backend/payment-service 
+    container_name: payment-backend
+    ports:
+      - "8084:8080"
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://cinema-db.cqv8o0gkkhu0.us-east-1.rds.amazonaws.com:1433;databaseName=EgyCinema;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=60000
