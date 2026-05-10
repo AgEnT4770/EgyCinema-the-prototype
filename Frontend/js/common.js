@@ -21,7 +21,13 @@ const ICONS = {
 // --- Auth (localStorage) ---
 const AUTH_KEY = 'egycinema:user';
 const Auth = {
-  current(){ try { return JSON.parse(localStorage.getItem(AUTH_KEY)); } catch { return null; } },
+  current(){ 
+    try { 
+        return JSON.parse(localStorage.getItem(AUTH_KEY)); 
+    } catch { 
+        return null; 
+    } 
+  },
   
   async signup(username, password){
     const res = await fetch('http://localhost:8080/api/auth/register', {
@@ -33,10 +39,12 @@ const Auth = {
         const msg = await res.text();
         throw new Error(msg);
     }
+    // Note: If your register API returns the user object with ID, 
+    // you should save it here too. Otherwise, force a login.
     localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
   },
 
- async login(username, password){
+async login(username, password){
     try {
         const res = await fetch('http://localhost:8080/api/auth/login', {
             method: 'POST',
@@ -52,19 +60,29 @@ const Auth = {
             throw new Error(errorMsg || 'Invalid credentials');
         }
 
-        // FIX: Handle JSON response correctly
         const data = await res.json(); 
-        const token = data.token; // Extract the actual string from the {"token": "..."} object
-        
-        sessionStorage.setItem('token', token);
-        localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
+        console.log("Login successful! Received data:", data); // DEBUG: Check your console for the ID
+
+        // 1. Save the token
+        sessionStorage.setItem('token', data.token);
+
+        // 2. THE CRITICAL FIX: Save the ID alongside the username
+        // Note: Use 'data.id' if your Java says 'Integer id' 
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ 
+            username: username, 
+            id: data.id 
+        }));
+
     } catch (err) {
         console.error("Login Fetch Error:", err);
         throw new Error(err.message || 'Server unreachable');
     }
 },
 
-  logout(){ localStorage.removeItem(AUTH_KEY); },
+  logout(){ 
+    localStorage.removeItem(AUTH_KEY); 
+    sessionStorage.removeItem('token'); // Also clear the token
+  },
 };
 // --- Favorites (per user, fallback to guest) ---
 function favKey(){
@@ -173,20 +191,25 @@ async function loadShowtimes(movie, cinemas) {
 }
 
   // Book ticket
-  function bookTicket(movieId, cinemaId, dateLabel, time) {
-    if (!Auth.current()) {
-        toast('Please log in to book', 'error');
-        setTimeout(() => {
-            location.href = 'login.html?next=' + encodeURIComponent(location.pathname + location.search);
-        }, 700);
+function bookTicket(movieId, cinemaId, date, time) {
+    // 1. Safety Check: User must be logged in
+    const user = Auth.current();
+    if (!user) {
+        toast('Please log in to book tickets', 'error');
+        setTimeout(() => location.href = 'login.html', 800);
         return;
     }
 
-    const url = `book.html?movie=${movieId}&cinema=${cinemaId}&date=${dateLabel}&time=${time}`;
-    window.location.href = url;
+   
+    const params = new URLSearchParams({
+        movie: movieId,
+        cinema: cinemaId,
+        date: date,   // e.g., 2026-06-30
+        time: time    // e.g., 10:00:00
+    });
+
+    window.location.href = `book.html?${params.toString()}`;
 }
-
-
 
 
 // --- Toast ---
@@ -239,7 +262,74 @@ document.addEventListener('click', (e) => {
   } catch (err) {
   }
 });
+// Add this new function to common.js
+async function executeBooking(bookingData) {
+    const API_BOOKING = "http://localhost:8082/bookings";
+    
+    try {
+        const response = await fetch(API_BOOKING, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Include token if your Booking service uses Security
+                'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                userId: bookingData.userId,
+                showtimeId: parseInt(bookingData.showtimeId),
+                movieId: parseInt(bookingData.movieId),
+                seats: parseInt(bookingData.seats),
+                bookingDate: new Date().toISOString()
+            })
+        });
 
+        if (response.ok) {
+            const result = await response.json();
+            return { success: true, id: result.id };
+        } else {
+            const error = await response.text();
+            return { success: false, message: error };
+        }
+    } catch (err) {
+        return { success: false, message: "Connection to Booking Service failed." };
+    }
+}
+async function handleBooking(movie, showtime, seatCount) {
+    if (seatCount === 0) return alert("Please select at least one seat.");
+
+    // Attempt to get the real user info from localStorage
+    const currentUser = Auth.current();
+    
+    const payload = {
+        // Use currentUser.id if you've updated your login to save it, 
+        // otherwise ensure user 1 exists in your DB for this placeholder to work.
+        userId: currentUser && currentUser.id ? parseInt(currentUser.id) : 1, 
+        showtimeId: parseInt(showtime.id),
+        movieId: parseInt(movie.MovieID || movie.movieId || movie.id),
+        seats: parseInt(seatCount),
+        bookingDate: new Date().toISOString().split('.')[0] 
+    };
+
+    try {
+        const res = await fetch(`${API_BOOKING}/bookings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            const result = await res.json();
+            alert(`🎟️ Success! Your booking ID is #${result.id}`);
+            window.location.href = "home.html";
+        } else {
+            const errorText = await res.text();
+            // This will show "Foreign Key Constraint" if user 1 is still missing
+            alert("Server rejected booking: " + errorText);
+        }
+    } catch (err) {
+        alert("Failed to reach the booking service.");
+    }
+}
 // --- Header ---
 function renderHeader(){
   const u = Auth.current();

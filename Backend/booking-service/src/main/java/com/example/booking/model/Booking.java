@@ -12,11 +12,11 @@ public class Booking {
     @Column(name = "BookingID")
     private Integer id;
 
-    @Column(name = "userid", nullable = false)
+   
     private Long userId;
 
     // ده فعليًا Showtime ID
-    @Column(name = "ShowID", nullable = false)
+    
     private Integer showtimeId;
 
     // Movie FK

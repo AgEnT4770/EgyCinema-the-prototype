@@ -14,7 +14,9 @@
   
   <main style="flex:1">
     <section class="featured" id="featured">
-      <!-- Featured movie injected here -->
+      <div class="container" style="padding: 4rem 0; text-align: center;">
+        <p style="color: var(--gold);">Loading latest premieres...</p>
+      </div>
     </section>
 
     <section id="cinemas" class="cinemas-section">
@@ -25,7 +27,7 @@
         </div>
         <div id="cinemaList">
           <!-- Loading State -->
-          <p style="text-align: center; padding: 2rem; color: #888;">Fetching cinemas from server...</p>
+          <p style="text-align: center; padding: 4rem; color: #888;">Connecting to Cinema Servers...</p>
         </div>
       </div>
     </section>
@@ -38,123 +40,151 @@
   <script src="js/common.js"></script>
 
   <script>
+    // --- Port Mapping ---
+    const API_CINEMA = "http://localhost:8080";    // Cinema Service
+    const API_MOVIES_SHOWS = "http://localhost:8083"; // Movie & Showtime Service
+
     mountChrome();
 
-    // 1. Handle the Featured Movie (using your existing data.js for now)
-    function renderFeatured() {
-        const f = MOVIES[0];
-        if (!f) return;
+   /**
+     * 1. Dynamic Hero Section (FIXED ID LOOKUP)
+     */
+    function renderFeatured(movie) {
+        if (!movie) return;
+        // Check for MovieID (from your JSON) or movieId (from your Java)
+        const mid = movie.MovieID || movie.movieId || movie.id;
+        
         document.getElementById('featured').innerHTML = `
-          <img src="${f.backdrop || f.poster}" alt="${f.title}" />
+          <img src="${movie.imgUrl || 'img/default-backdrop.jpg'}" alt="${movie.title}" />
           <div class="container">
-            <div class="eyebrow">Featured</div>
-            <h1>${f.title}</h1>
-            <p>${f.description}</p>
+            <div class="eyebrow">Now Premiering</div>
+            <h1>${movie.title}</h1>
+            <p>${movie.status || 'Experience the latest cinematic masterpiece on the big screen.'}</p>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-              <a class="btn btn-hero btn-lg" href="movie.html?id=${f.id}"><span class="icon">${ICONS.play}</span> Watch details</a>
-              ${favButtonHTML(f.id, {size:'lg'})}
+              <a class="btn btn-hero btn-lg" href="movie.html?id=${mid}"><span class="icon">${ICONS.play}</span> Watch details</a>
             </div>
           </div>`;
     }
 
-    // 2. Fetch Cinemas from Backend
-    async function loadCinemas() {
+    /**
+     * 2. Cross-Service Data Mapping (FIXED MAPPING LOGIC)
+     */
+    async function loadPageData() {
         const listContainer = document.getElementById('cinemaList');
         
         try {
-            // Note: Matching your @RequestMapping("/api/Cinemas") case sensitivity
-            const response = await fetch('http://localhost:8080/api/Cinemas');
-            
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            
-            const cinemas = await response.json();
-            
-            if (cinemas.length === 0) {
-                listContainer.innerHTML = "<p>No cinemas found in the database.</p>";
+            const [resCinemas, resMovies, resShows] = await Promise.all([
+                fetch(`${API_CINEMA}/api/Cinemas`),        
+                fetch(`${API_MOVIES_SHOWS}/movies`),      
+                fetch(`${API_MOVIES_SHOWS}/showtimes`)    
+            ]);
+
+            if (!resCinemas.ok || !resMovies.ok || !resShows.ok) throw new Error("Connection failed");
+
+            const allCinemas = await resCinemas.json();
+            const allMovies = await resMovies.json();
+            const allShowtimes = await resShows.json();
+
+            if (allMovies.length > 0) renderFeatured(allMovies[0]);
+
+            if (allCinemas.length === 0) {
+                listContainer.innerHTML = "<p style='text-align:center;'>No cinemas found.</p>";
                 return;
             }
 
-            // Render the fetched cinemas
-            listContainer.innerHTML = cinemas.map(c => renderCinemaRow(c)).join('');
+            listContainer.innerHTML = allCinemas.map(cinema => {
+                const cid = cinema.id || cinema.cinemaId || cinema.CinemaID;
+                
+                // 1. Find showtimes for this cinema
+                const cinemaShowtimes = allShowtimes.filter(s => s.cinemaId == cid);
+
+                // 2. Get unique Movie IDs from those showtimes
+                const movieIdsAtCinema = [...new Set(cinemaShowtimes.map(s => s.movieId))];
+
+                // 3. Find the Movie object by checking all possible ID casings
+                const moviesToShow = movieIdsAtCinema.map(mid => 
+                    allMovies.find(m => (m.MovieID || m.movieId || m.id) == mid)
+                ).filter(Boolean);
+
+                return renderCinemaRow(cinema, moviesToShow, cinemaShowtimes);
+            }).join('');
 
         } catch (error) {
             console.error("Backend connection failed:", error);
-            listContainer.innerHTML = `
-                <div style="background: rgba(255,0,0,0.1); padding: 2rem; border-radius: 8px; text-align: center;">
-                    <p style="color: #ff6b6b;">Error connecting to Cinema Service at localhost:8080</p>
-                    <small style="color: #888;">Check if your Spring Boot Application is running.</small>
-                </div>`;
+            listContainer.innerHTML = `<p style="text-align:center; padding: 3rem;">Synchronization Error. Check Console.</p>`;
         }
     }
 
-    // 3. Helper to build the Cinema HTML Row
-    function renderCinemaRow(c) {
-        // Since we are moving from static to dynamic, we check if the cinema has movieIds.
-        // If your DB Cinema entity doesn't have movieIds yet, we'll show a "Coming Soon" message.
-        const moviesHtml = (c.movieIds && c.movieIds.length > 0) 
-            ? c.movieIds.map(id => renderMovieCard(id, c.id)).join('')
-            : `<p style="grid-column: 1/-1; padding: 2rem; color: #666; text-align: center;">
-                No movies currently scheduled for this branch.
-               </p>`;
+    /**
+     * 3. Cinema Row Generator
+     */
+    function renderCinemaRow(cinema, movies, showtimes) {
+        const cid = cinema.id || cinema.cinemaId || cinema.CinemaID;
+        const moviesHtml = movies.length > 0 
+            ? movies.map(m => {
+                const mid = m.MovieID || m.movieId || m.id;
+                const movieShows = showtimes.filter(s => s.movieId == mid);
+                return renderMovieCard(m, cid, movieShows);
+            }).join('')
+            : `<p style="grid-column: 1/-1; padding: 2rem; color: #444; text-align: center;">No screenings scheduled.</p>`;
 
         return `
           <div class="cinema-row">
             <div class="head">
               <div>
-                <h2>${c.name}</h2>
-                <div class="loc"><span class="icon">${ICONS.pin}</span>${c.location || 'Egypt'}</div>
+                <h2>${cinema.name}</h2>
+                <div class="loc"><span class="icon">${ICONS.pin}</span>${cinema.location || 'Egypt'}</div>
               </div>
               <div class="divider"></div>
             </div>
-            <div class="movie-grid">
-              ${moviesHtml}
-            </div>
+            <div class="movie-grid">${moviesHtml}</div>
           </div>`;
     }
 
-    // 4. Helper for Movie Cards (reused from your original logic)
-    function renderMovieCard(movieId, cinemaId) {
-        const m = getMovie(movieId); 
-        if(!m) return '';
-        const shows = getShowtimes(m.id, cinemaId);
+    /**
+     * 4. Movie Card Generator (FIXED DATE AND ID)
+     */
+    function renderMovieCard(m, cinemaId, showtimes) {
+        const mid = m.MovieID || m.movieId || m.id;
+        const releaseDate = m.ReleaseDate || m.releaseDate; // Handle both casings
+        
+        const grouped = showtimes.reduce((acc, s) => {
+            const d = s.date || "Today";
+            if (!acc[d]) acc[d] = [];
+            // Handle cases where time might be null
+            if(s.time) acc[d].push(s.time.substring(0, 5));
+            return acc;
+        }, {});
 
         return `
           <div class="movie-card movie-card-grid">
-            <a href="movie.html?id=${m.id}" class="poster-link">
+            <a href="movie.html?id=${mid}" class="poster-link">
               <div class="poster">
-                <span class="rating">${m.rating}</span>
-                ${favButtonHTML(m.id)}
-                <img src="${m.poster}" alt="${m.title} poster" loading="lazy" />
+                <span class="rating">${m.status || 'PG-13'}</span>
+                <img src="${m.imgUrl || 'img/default-poster.jpg'}" alt="${m.title}" loading="lazy" />
               </div>
               <h3>${m.title}</h3>
               <div class="movie-meta">
-                <span>${ICONS.clock}${m.duration}</span>
-                <span><span class="star">${ICONS.star}</span>${m.year}</span>
+                <span>${ICONS.clock} ${m.duration} min</span>
+                <span>${releaseDate ? releaseDate.toString().substring(0,4) : '2026'}</span>
               </div>
             </a>
             <div class="showtimes">
-              ${shows.map(d => `
+              ${Object.keys(grouped).map(date => `
                 <div class="show-day">
-                  <div class="show-date"><span class="icon">${ICONS.cal}</span>${d.label}</div>
+                  <div class="show-date"><span class="icon">${ICONS.cal}</span>${date}</div>
                   <div class="show-times">
-                    ${d.times.map(t => `
-                      <button type="button" class="time-chip" 
-                        onclick="bookTicket('${m.id}', '${cinemaId}', ${JSON.stringify(d.label)}, '${t}')">
+                    ${grouped[date].map(t => `
+                      <button type="button" class="time-chip">
                         ${t}
                       </button>`).join('')}
                   </div>
                 </div>`).join('')}
             </div>
-            <button type="button" class="btn btn-hero btn-sm book-btn"
-              onclick="bookTicket('${m.id}', '${cinemaId}', 'Today', '${shows[0]?.times[0] || 'N/A'}')">
-              <span class="icon">${ICONS.ticket}</span> Book ticket
-            </button>
           </div>`;
     }
-
-    // Initialize Page
-    renderFeatured();
-    loadCinemas();
+    // Start
+    loadPageData();
   </script>
 </body>
 </html>

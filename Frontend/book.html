@@ -1,149 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book Tickets — EgyCinema</title>
-<link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Tickets — EgyCinema</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        .icon-sm svg { width: 18px; height: 18px; vertical-align: middle; fill: currentColor; }
+        .back-link svg { width: 20px; height: 20px; vertical-align: middle; }
+        .seat.occupied { background: #333 !important; cursor: not-allowed; opacity: 0.5; }
+        .seat.selected { background: var(--gold) !important; color: black; border-color: var(--gold); }
+    </style>
 </head>
 <body>
-<div id="header-slot"></div>
-<main id="root"></main>
-<div id="footer-slot"></div>
+    <div id="header-slot"></div>
+    
+    <main id="root">
+        <!-- Loading Spinner -->
+        <div class="container" style="padding:100px 0; text-align:center;">
+            <div class="loader"></div>
+            <p style="color:var(--gold); margin-top:20px;">Securing your connection to the box office...</p>
+        </div>
+    </main>
 
-<script src="js/data.js"></script>
-<script src="js/common.js"></script>
-<script>
-    mountChrome();
+    <div id="footer-slot"></div>
 
-    const p = new URLSearchParams(location.search);
-    const movie = getMovie(p.get('movie'));
-    const cinema = getCinema(p.get('cinema'));
-    const date = p.get('date');
-    const time = p.get('time');
+    <script src="js/common.js"></script>
+    <script>
+        const API_CINEMA = "http://localhost:8080";    
+        const API_MOVIES_SHOWS = "http://localhost:8083"; 
+        const API_BOOKING = "http://localhost:8082";
 
-    const PRICE = 120;
-    const ROWS = ['A','B','C','D','E','F','G','H'];
-    const COLS = 10;
-    const root = document.getElementById('root');
-    const isSeatOccupied = (mId, cId, d, t, r, c) => ( (r + c) % 7 === 0);
+        mountChrome();
 
-    if(!movie || !cinema || !date || !time){
-        root.innerHTML = `
-        <div class="container" style="padding:80px 0;text-align:center">
-            <h1 class="font-display" style="font-size:28px;margin-bottom:16px">Booking not found</h1>
-            <p>We couldn't find the movie or cinema details.</p>
-            <a href="home.html" class="btn btn-hero" style="margin-top:20px">Back to home</a>
-        </div>`;
-    } else {
-        const selected = new Set();
+        async function initBooking() {
+            const params = new URLSearchParams(location.search);
+            const movieId = params.get('movie');
+            const cinemaId = params.get('cinema');
+            const date = params.get('date');
+            const time = params.get('time');
 
-        function buildSeats(){
-            let html = '';
-            ROWS.forEach((row, ri) => {
-                html += `<div class="seat-row"><span class="row-label">${row}</span><div class="seats">`;
-                for(let c=0; c<COLS; c++){
-                    const id = `${row}${c+1}`;
-                    const occ = isSeatOccupied(movie.id, cinema.id, date, time, ri, c);
-                    const cls = ['seat'];
-                    if(c===4) cls.push('aisle');
-                    if(occ) cls.push('occupied');
-                    html += `<button class="${cls.join(' ')}" data-seat="${id}" ${occ?'disabled':''}>${c+1}</button>`;
+            try {
+                const [resMovie, resCinemas, resShows] = await Promise.all([
+                    fetch(`${API_MOVIES_SHOWS}/movies/${movieId}`).then(r => r.json()),
+                    fetch(`${API_CINEMA}/api/Cinemas`).then(r => r.json()),
+                    fetch(`${API_MOVIES_SHOWS}/showtimes/movie/${movieId}`).then(r => r.json())
+                ]);
+
+                const cinema = resCinemas.find(c => (c.id || c.cinemaId || c.CinemaID) == cinemaId);
+                const showtime = resShows.find(s => s.date == date && s.time.startsWith(time));
+
+                if (!resMovie || !cinema || !showtime) {
+                    renderError("We couldn't verify this showtime. It may have expired.");
+                    return;
                 }
-                html += `</div></div>`;
-            });
-            return html;
+
+                renderBookingUI(resMovie, cinema, showtime);
+
+            } catch (err) {
+                console.error("Booking Init Error:", err);
+                renderError("Connection to cinema servers failed.");
+            }
         }
 
-        function updateSummary(){
-            const seats = [...selected].sort();
-            document.getElementById('seatList').textContent = seats.length ? seats.join(', ') : '—';
-            document.getElementById('totalVal').textContent = (seats.length * PRICE) + ' EGP';
-        }
+        function renderBookingUI(movie, cinema, showtime) {
+            const selected = new Set();
+            const PRICE = showtime.price || 120;
+            const ROWS = ['A','B','C','D','E','F','G','H'];
+            const COLS = 10;
+            const mid = movie.MovieID || movie.movieId || movie.id;
 
-        root.innerHTML = `
-        <div class="container" style="padding-top:24px; padding-bottom:40px">
-            <a href="home.html" class="back-link" style="display:flex; align-items:center; gap:8px; margin-bottom:20px; color:var(--gold); text-decoration:none">
-                ${ICONS.back} <span>Back to Movies</span>
-            </a>
-            <div class="booking-grid">
-                <div>
-                    <div class="uppercase-spaced" style="color:var(--gold); letter-spacing:2px; font-size:12px">${cinema.name}</div>
-                    <h1 class="font-display" style="font-size:clamp(28px,4vw,42px); font-weight:900; margin:8px 0">${movie.title}</h1>
-                    
-                    <div class="meta-row" style="display:flex; flex-wrap:wrap; gap:20px; color:gray; font-size:14px; margin-bottom:30px">
-                        <span><span class="icon-sm">${ICONS.pin}</span> ${cinema.location}</span>
-                        <span><span class="icon-sm">${ICONS.cal}</span> ${date}</span>
-                        <span><span class="icon-sm">${ICONS.clock}</span> ${time}</span>
+            const isOccupied = (r, c) => ( (r.charCodeAt(0) + c) % 7 === 0);
+
+            document.getElementById('root').innerHTML = `
+            <div class="container" style="padding: 40px 0">
+                <a href="home.html" class="back-link" style="color:var(--gold); text-decoration:none; display:inline-flex; align-items:center; gap:8px; margin-bottom:30px;">
+                    ${ICONS.back} <span>Back to Movies</span>
+                </a>
+
+                <div class="booking-grid">
+                    <div class="main-selection">
+                        <div class="eyebrow" style="color:var(--gold); text-transform:uppercase; letter-spacing:1px;">${cinema.name}</div>
+                        <h1 class="font-display" style="font-size:36px; margin:10px 0 40px 0">${movie.title}</h1>
+
+                        <div class="screen-container" style="margin-bottom:50px">
+                            <div class="screen" style="height: 4px; background: var(--gold); box-shadow: 0 4px 20px var(--gold); border-radius: 50%;"></div>
+                            <p style="text-align:center; color:gray; font-size:11px; text-transform:uppercase; margin-top:10px">Stage / Screen</p>
+                        </div>
+                        
+                        <div id="seatMap" class="seat-map">
+                            ${ROWS.map(r => `
+                                <div class="seat-row" style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px">
+                                    <span style="width:20px; color:gray; font-size:12px">${r}</span>
+                                    <div class="seats" style="display:flex; gap:8px">
+                                        ${Array.from({length: COLS}, (_, i) => {
+                                            const seatId = `${r}${i+1}`;
+                                            const occ = isOccupied(r, i+1);
+                                            return `<button class="seat ${occ?'occupied':''}" 
+                                                    data-seat="${seatId}" 
+                                                    ${occ?'disabled':''}
+                                                    style="width:30px; height:30px; border-radius:4px; border:1px solid #444; background:transparent; color:white; cursor:pointer;">
+                                                    ${i+1}</button>`;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
 
-                    <div class="screen"></div>
-                    <div class="screen-label" style="text-align:center; color:gray; font-size:12px; margin-bottom:30px; text-transform:uppercase">Screen</div>
-                    
-                    <div class="seat-map" id="seatMap">${buildSeats()}</div>
-                    
-                    <div class="legend" style="display:flex; justify-content:center; gap:20px; margin-top:30px; font-size:13px">
-                        <span><span class="swatch"></span> Available</span>
-                        <span><span class="swatch sel" style="background:var(--gold)"></span> Selected</span>
-                        <span><span class="swatch taken" style="background:#333"></span> Taken</span>
-                    </div>
+                    <aside class="booking-summary" style="background:#111; padding:30px; border-radius:16px; border:1px solid #222; align-self:start;">
+                        <div style="display:flex; gap:15px; margin-bottom:25px; padding-bottom:20px; border-bottom:1px solid #222">
+                            <img src="${movie.poster || movie.imgUrl || 'img/default-poster.jpg'}" style="width:70px; border-radius:8px; object-fit:cover;">
+                            <div>
+                                <h4 style="margin:0">${movie.title}</h4>
+                                <p style="font-size:12px; color:gray; margin-top:5px">Hall ${showtime.hallId || '01'}</p>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:15px; font-size:14px">
+                            <div style="display:flex; justify-content:space-between"><span style="color:gray">Seats</span><span id="seatList" style="color:var(--gold)">—</span></div>
+                            <div style="display:flex; justify-content:space-between; padding-top:15px; border-top:1px solid #222; font-weight:bold">
+                                <span>Total Price</span><span id="totalVal" style="color:var(--gold); font-size:20px">0 EGP</span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-hero btn-block" id="confirmBtn" style="width:100%; margin-top:30px; padding:15px; background:var(--gold); color:black; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
+                            Confirm & Pay
+                        </button>
+                    </aside>
                 </div>
+            </div>`;
 
-                <aside class="summary" style="background:#111; padding:24px; border-radius:12px; border:1px solid #222">
-                    <div class="top" style="display:flex; gap:16px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid #222">
-                        <img src="${movie.poster}" style="width:80px; border-radius:8px">
-                        <div>
-                            <h4 style="margin:0 0 4px 0">${movie.title}</h4>
-                            <p style="font-size:12px; color:gray; margin:0">${movie.genre}</p>
-                            <p style="font-size:12px; color:var(--gold); margin:4px 0 0 0">${movie.duration}</p>
-                        </div>
-                    </div>
-                    <div class="lines" style="display:flex; flex-direction:column; gap:12px; font-size:14px">
-                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Cinema</span><span>${cinema.name}</span></div>
-                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Date</span><span>${date}</span></div>
-                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Time</span><span>${time}</span></div>
-                        <div style="display:flex; justify-content:space-between"><span style="color:gray">Seats</span><span id="seatList" style="color:var(--gold)">—</span></div>
-                        <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #222; font-weight:bold">
-                            <span>Total</span><span id="totalVal" style="color:var(--gold); font-size:18px">0 EGP</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-hero btn-block" id="confirmBtn" style="width:100%; margin-top:24px; padding:14px">
-                        Confirm Booking
-                    </button>
-                </aside>
-            </div>
-        </div>`;
+            const seatMap = document.getElementById('seatMap');
+            seatMap.addEventListener('click', e => {
+                const seat = e.target.closest('.seat:not(.occupied)');
+                if (!seat) return;
 
-        document.getElementById('seatMap').addEventListener('click', e => {
-            const b = e.target.closest('[data-seat]');
-            if(!b || b.disabled) return;
-            const id = b.getAttribute('data-seat');
-            if(selected.has(id)){
-                selected.delete(id);
-                b.classList.remove('selected');
-            } else {
-                selected.add(id);
-                b.classList.add('selected');
-            }
-            updateSummary();
-        });
+                const sid = seat.dataset.seat;
+                if (selected.has(sid)) {
+                    selected.delete(sid);
+                    seat.classList.remove('selected');
+                } else {
+                    selected.add(sid);
+                    seat.classList.add('selected');
+                }
 
-        document.getElementById('confirmBtn').addEventListener('click', () => {
-            if(selected.size === 0){
-                toast('Please select at least one seat', 'error');
-                return;
-            }
-            const seats = [...selected].sort().join(',');
-            const total = selected.size * PRICE;
-            const params = new URLSearchParams({
-                movie: movie.id,
-                cinema: cinema.id,
-                date, time, seats,
-                total: String(total)
+                document.getElementById('seatList').textContent = [...selected].sort().join(', ') || '—';
+                document.getElementById('totalVal').textContent = (selected.size * PRICE) + ' EGP';
             });
-            location.href = 'payment.html?' + params.toString();
-        });
-    }
-</script>
+
+            document.getElementById('confirmBtn').onclick = () => {
+                if (selected.size === 0) {
+                    if(typeof toast === 'function') toast('Please select at least one seat', 'error');
+                    else alert("Please select at least one seat.");
+                    return;
+                }
+                
+                handleBooking(movie, showtime, selected);
+            };
+        }
+
+        async function handleBooking(movie, showtime, selectedSet) {
+            const seatsArray = [...selectedSet].sort();
+            
+            // 1. Map the User ID using the Username
+            let mappedUserId = null;
+            const authUser = Auth.current();
+            
+            if (authUser && authUser.username) {
+                try {
+                    const usersRes = await fetch(`${API_CINEMA}/api/auth/users`);
+                    if (usersRes.ok) {
+                        const usersList = await usersRes.json();
+                        const foundUser = usersList.find(u => u.username === authUser.username);
+                        if (foundUser) {
+                            mappedUserId = foundUser.id;
+                        }
+                    }
+                } catch (err) {
+                    console.warn("User mapping unavailable.");
+                }
+            }
+
+            // 2. CRITICAL FIX: Restored 'seats', 'userId', and 'showtimeId' to map perfectly to your Java Entity
+            const payload = {
+                userId: mappedUserId, 
+                showtimeId: showtime.id ? parseInt(showtime.id) : null,
+                movieId: parseInt(movie.MovieID || movie.movieId || movie.id),
+                seats: seatsArray.length, // This fixes the Check Constraint error
+                bookingDate: new Date().toISOString().split('.')[0]
+            };
+
+            try {
+                const res = await fetch(`${API_BOOKING}/bookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    const params = new URLSearchParams({
+                        bookingId: result.id || 'N/A',
+                        movie: movie.title,
+                        poster: movie.poster || movie.imgUrl || '', // تمرير رابط الصورة
+                        total: (seatsArray.length * (showtime.price || 120))
+                    });
+                    location.href = 'payment.html?' + params.toString();
+                } else {
+                    const errorMsg = await res.text();
+                    alert(`The booking server is currently busy. Error: ${errorMsg}`);
+                }
+            } catch (err) {
+                console.error("Booking POST Error:", err);
+                alert("Failed to reach the booking service.");
+            }
+        }
+
+        function renderError(msg) {
+            document.getElementById('root').innerHTML = `
+                <div class="container" style="padding:100px 0; text-align:center;">
+                    <h2 class="font-display" style="color:white">${msg}</h2>
+                    <a href="home.html" class="btn btn-outline" style="margin-top:20px; color:var(--gold)">Return Home</a>
+                </div>`;
+        }
+
+        initBooking();
+    </script>
 </body>
 </html>

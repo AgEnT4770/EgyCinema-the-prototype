@@ -5,65 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Payment — EgyCinema</title>
 <link rel="stylesheet" href="css/styles.css">
-
+<style>
+    .pay-grid { display: grid; grid-template-columns: 1fr 350px; gap: 40px; }
+    .pay-card { background: #111; padding: 30px; border-radius: 16px; border: 1px solid #222; }
+    .methods { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; margin-top: 20px; }
+    .method { padding: 12px 16px; background: #222; border: 1px solid #333; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; flex: 1 1 calc(33.333% - 10px); color: white; transition: 0.2s; }
+    .method:hover { border-color: var(--gold); }
+    .method.active { background: rgba(255, 215, 0, 0.1); border-color: var(--gold); color: var(--gold); }
+    .pane { display: none; }
+    .pane.active { display: block; animation: fadeIn 0.3s ease; }
+    .field { margin-bottom: 20px; }
+    .field label { display: block; margin-bottom: 8px; font-size: 13px; color: gray; }
+    .field input { width: 100%; padding: 12px; background: #222; border: 1px solid #333; color: white; border-radius: 8px; font-family: inherit; }
+    .field input:focus { outline: none; border-color: var(--gold); }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .secure-note { margin-top: 30px; padding-top: 20px; border-top: 1px solid #222; color: gray; font-size: 12px; text-align: center; }
+    .wallet-info { background: #222; padding: 20px; border-radius: 8px; border-left: 4px solid var(--gold); font-size: 14px; line-height: 1.5; }
+    .wallet-info strong { display: block; margin-bottom: 5px; color: white; }
+    @media (max-width: 768px) { .pay-grid { grid-template-columns: 1fr; } .method { flex: 1 1 100%; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
 <div id="header-slot"></div>
 <main id="root"></main>
 <div id="footer-slot"></div>
 
-<script src="js/data.js"></script>
 <script src="js/common.js"></script>
 <script>
   mountChrome();
 
+  // Retrieve data from URL correctly
   const p = new URLSearchParams(location.search);
-  const movie = getMovie(p.get('movie'));
-  const cinema = getCinema(p.get('cinema'));
-  const date = p.get('date');
-  const time = p.get('time');
-  const seats = (p.get('seats') || '').split(',').filter(Boolean);
+  
+  const movieData = {
+    title: p.get('movie'),
+    poster: p.get('poster') || "img/default-poster.jpg",
+    genre: p.get('genre') || "Cinema Release",
+    duration: p.get('duration') || "120 mins"
+  };
+
+  const cinemaName = p.get('cinema') || "EgyCinema Branch";
+  const date = p.get('date') || "Today";
+  const time = p.get('time') || "00:00";
+  
+  // FIX: booking sends only number of seats, not array
+  const seatsCount = parseInt(p.get('seats') || '0', 10);
+  
   const total = parseInt(p.get('total') || '0', 10);
+  const bookingId = p.get('bookingId') || "N/A";
 
   const root = document.getElementById('root');
 
-  if(!movie || !cinema || !seats.length){
+  // FIX: removed seats.length check (was causing crash/expiration)
+  if(!movieData.title){
     root.innerHTML = `
-      <div class="container" style="padding:80px 0;text-align:center">
-        <h1 class="font-display" style="font-size:28px;margin-bottom:16px">Payment session expired</h1>
-        <p style="color:gray">Please start your booking again.</p>
-        <a href="home.html" class="btn btn-hero" style="margin-top:20px">Back to home</a>
+      <div class="container" style="padding:100px 0; text-align:center;">
+        <h1 class="font-display" style="font-size:32px; color:white; margin-bottom:16px">Payment session expired</h1>
+        <p style="color:gray">Your seat reservation session has ended or is invalid.</p>
+        <a href="home.html" class="btn btn-outline" style="margin-top:30px; display:inline-block; border-color:var(--gold); color:var(--gold);">Back to home</a>
       </div>`;
   } else {
     root.innerHTML = `
-      <div class="container" style="padding-top:24px;padding-bottom:60px">
-        <a href="javascript:history.back()" class="back-link" style="display:flex;align-items:center;gap:8px;margin-bottom:20px;color:var(--gold);text-decoration:none">
+      <div class="container" style="padding-top:40px; padding-bottom:80px">
+        <a href="javascript:history.back()" class="back-link" style="display:inline-flex; align-items:center; gap:8px; margin-bottom:30px; color:var(--gold); text-decoration:none">
           ${ICONS.back} <span>Back to seat selection</span>
         </a>
 
-        <div style="margin-bottom:30px">
-          <div class="uppercase-spaced" style="color:var(--gold);letter-spacing:2px;font-size:12px">Checkout</div>
-          <h1 class="font-display" style="font-size:clamp(28px,4vw,42px);font-weight:900;margin:8px 0">Payment</h1>
-          <p style="color:gray;margin:0">Choose how you'd like to pay for your tickets.</p>
+        <div style="margin-bottom:40px">
+          <div class="uppercase-spaced" style="color:var(--gold); letter-spacing:2px; font-size:12px">Booking ID: #${bookingId}</div>
+          <h1 class="font-display" style="font-size:clamp(32px, 4vw, 48px); font-weight:900; margin:10px 0">Checkout</h1>
+          <p style="color:gray; margin:0">Choose how you'd like to pay for your tickets.</p>
         </div>
 
         <div class="pay-grid">
           <div class="pay-card">
-            <h2>Select payment method</h2>
+            <h2 style="font-size: 20px; margin-top:0;">Payment Method</h2>
             <div class="methods" id="methods">
-              <div class="method active" data-method="card"><span class="ic">💳</span><span>Credit / Debit Card</span></div>
+              <div class="method active" data-method="card"><span class="ic">💳</span><span>Credit / Debit</span></div>
               <div class="method" data-method="vodafone"><span class="ic">📱</span><span>Vodafone Cash</span></div>
               <div class="method" data-method="instapay"><span class="ic">⚡</span><span>InstaPay</span></div>
               <div class="method" data-method="fawry"><span class="ic">🏪</span><span>Fawry</span></div>
-              <div class="method" data-method="paypal"><span class="ic">🅿️</span><span>PayPal</span></div>
-              <div class="method" data-method="cash"><span class="ic">💵</span><span>Pay at Cinema</span></div>
+              <div class="method" data-method="cash"><span class="ic">💵</span><span>Pay at Box Office</span></div>
             </div>
 
-            <!-- Card -->
+            <!-- Card Pane -->
             <div class="pane active" data-pane="card">
               <div class="field">
                 <label>Cardholder name</label>
-                <input type="text" placeholder="Name on card" id="ccName">
+                <input type="text" placeholder="Name as it appears on card" id="ccName">
               </div>
               <div class="field">
                 <label>Card number</label>
@@ -71,11 +101,11 @@
               </div>
               <div class="row2">
                 <div class="field">
-                  <label>Expiry</label>
+                  <label>Expiry Date</label>
                   <input type="text" placeholder="MM/YY" maxlength="5" id="ccExp">
                 </div>
                 <div class="field">
-                  <label>CVV</label>
+                  <label>CVV / CVC</label>
                   <input type="text" placeholder="123" maxlength="4" id="ccCvv">
                 </div>
               </div>
@@ -84,75 +114,67 @@
             <!-- Vodafone Cash -->
             <div class="pane" data-pane="vodafone">
               <div class="field">
-                <label>Vodafone Cash number</label>
+                <label>Vodafone Cash Mobile Number</label>
                 <input type="tel" placeholder="010xxxxxxxx" maxlength="11" id="vodaNum">
               </div>
-              <div class="wallet-info"><strong>You'll receive an SMS</strong>Approve the payment from your Vodafone Cash app to confirm.</div>
+              <div class="wallet-info"><strong>You will receive a prompt on your phone.</strong> Enter your PIN to approve the payment securely.</div>
             </div>
 
             <!-- InstaPay -->
             <div class="pane" data-pane="instapay">
               <div class="field">
-                <label>InstaPay address or mobile</label>
-                <input type="text" placeholder="user@instapay" id="instaAddress">
+                <label>InstaPay Payment Address (IPA)</label>
+                <input type="text" placeholder="username@instapay" id="instaAddress">
               </div>
-              <div class="wallet-info"><strong>Open your InstaPay app</strong>Confirm the request to complete the payment.</div>
+              <div class="wallet-info"><strong>Open your InstaPay app.</strong> You will find a pending request to confirm the transaction.</div>
             </div>
 
-            <!-- Fawry -->
+            <!-- Fawry & Cash -->
             <div class="pane" data-pane="fawry">
-              <div class="wallet-info">
-                <strong>Reference code will be generated</strong>
-                Pay at any Fawry outlet within 24 hours using the reference code we send to your email.
-              </div>
+              <div class="wallet-info" style="border-left-color: #F8CA1C;"><strong>Fawry Reference Code</strong> A reference code will be generated upon confirmation. Pay at any Fawry kiosk within 2 hours.</div>
             </div>
-
-            <!-- PayPal -->
-            <div class="pane" data-pane="paypal">
-              <div class="field">
-                <label>PayPal email</label>
-                <input type="email" placeholder="you@example.com" id="paypalEmail">
-              </div>
-              <div class="wallet-info"><strong>Redirect to PayPal</strong>You'll be redirected to PayPal to complete the payment securely.</div>
-            </div>
-
-            <!-- Cash -->
+            
             <div class="pane" data-pane="cash">
-              <div class="wallet-info">
-                <strong>Pay at the cinema</strong>
-                Reserve now and pay in cash at the box office. Please arrive 30 minutes before showtime.
-              </div>
+              <div class="wallet-info" style="border-left-color: #4CAF50;"><strong>Pay at the Cinema Box Office</strong> Your seats will be reserved. Please arrive 30 minutes early to complete your payment.</div>
             </div>
 
-            <div class="secure-note">All payments are encrypted and processed securely</div>
+            <div class="secure-note">🔒 All payments are encrypted and processed securely.</div>
           </div>
 
-          <aside class="pay-card">
-            <div style="display:flex;gap:14px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #222">
-              <img src="${movie.poster}" style="width:72px;border-radius:8px">
+          <aside class="pay-card" style="align-self: start;">
+            <div style="display:flex; gap:15px; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #222">
+              <img src="${movieData.poster}" style="width:80px; height:120px; object-fit:cover; border-radius:8px">
               <div>
-                <h4 style="margin:0 0 4px 0">${movie.title}</h4>
-                <p style="font-size:12px;color:gray;margin:0">${movie.genre}</p>
-                <p style="font-size:12px;color:var(--gold);margin:4px 0 0 0">${movie.duration}</p>
+                <h4 style="margin:0 0 5px 0; font-size:18px;">${movieData.title}</h4>
+                <p style="font-size:13px; color:gray; margin:0">${movieData.genre}</p>
+                <p style="font-size:13px; color:var(--gold); margin:5px 0 0 0">${movieData.duration}</p>
               </div>
             </div>
             <div class="summary-mini">
-              <div class="row"><span>Cinema</span><span>${cinema.name}</span></div>
-              <div class="row"><span>Date</span><span>${date}</span></div>
-              <div class="row"><span>Time</span><span>${time}</span></div>
-              <div class="row"><span>Seats</span><span style="color:var(--gold)">${seats.join(', ')}</span></div>
-              <div class="row"><span>Tickets</span><span>${seats.length}</span></div>
-              <div class="row total-row"><span>Total</span><span>${total} EGP</span></div>
+              <div class="row" style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                <span style="color:gray;">Cinema</span><span>${cinemaName}</span>
+              </div>
+              <div class="row" style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                <span style="color:gray;">Date</span><span>${date}</span>
+              </div>
+              <div class="row" style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                <span style="color:gray;">Time</span><span>${time}</span>
+              </div>
+              <div class="row" style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                <span style="color:gray;">Seats</span>
+                <span style="color:var(--gold)">${seatsCount} seat(s)</span> <!-- UPDATED LINE -->
+              </div>
+              <div class="row" style="display:flex; justify-content:space-between; margin-bottom:20px; padding-top:15px; border-top:1px solid #222; font-weight:bold; font-size:20px">
+                <span>Total</span><span style="color:var(--gold)">${total} EGP</span>
+              </div>
             </div>
-            <button class="btn btn-hero btn-block" id="payBtn" style="width:100%;margin-top:20px;padding:14px">
-              Pay ${total} EGP
+            <button class="btn btn-hero btn-block" id="payBtn" style="width:100%; padding:15px; background:var(--gold); border:none; color:black; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px;">
+              Complete Payment
             </button>
-            <p style="font-size:11px;color:gray;text-align:center;margin:12px 0 0 0">By confirming you agree to our terms of service.</p>
           </aside>
         </div>
       </div>`;
 
-    // Method switching
     const methodsEl = document.getElementById('methods');
     methodsEl.addEventListener('click', e => {
       const m = e.target.closest('[data-method]');
@@ -165,67 +187,48 @@
       });
     });
 
-    // Card formatting
-    const ccNum = document.getElementById('ccNum');
-    ccNum && ccNum.addEventListener('input', e => {
-      let v = e.target.value.replace(/\D/g,'').slice(0,16);
-      e.target.value = v.replace(/(\d{4})(?=\d)/g,'$1 ');
-    });
-    const ccExp = document.getElementById('ccExp');
-    ccExp && ccExp.addEventListener('input', e => {
-      let v = e.target.value.replace(/\D/g,'').slice(0,4);
-      if(v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
-      e.target.value = v;
-    });
-
     document.getElementById('payBtn').addEventListener('click', () => {
-      const method = methodsEl.querySelector('.method.active').dataset.method;
-      const labels = {card:'Card',vodafone:'Vodafone Cash',instapay:'InstaPay',fawry:'Fawry',paypal:'PayPal',cash:'Cash at cinema'};
-
-        // Card Validation
-      if(method === 'card'){
+    const activeMethod = methodsEl.querySelector('.method.active').dataset.method;
+      
+      // Card Validation
+      if(activeMethod === 'card'){
         const num = (document.getElementById('ccNum').value || '').replace(/\s/g,'');
         const name = document.getElementById('ccName').value.trim();
         const exp = document.getElementById('ccExp').value.trim();
         const cvv = document.getElementById('ccCvv').value.trim();
-        if(!name || num.length < 13 || exp.length < 4 || cvv.length < 3){
-          toast('Please fill in all card details', 'error');
+        
+        if(!name || num.length < 16 || exp.length < 5 || cvv.length < 3){
+          alert('Please fill in all card details correctly.');
           return;
         }
       }
-        // Vodafone Validation
-      if(method === 'vodafone'){
+
+      // Vodafone Validation
+      if(activeMethod === 'vodafone'){
         const vodaNum = document.getElementById('vodaNum').value.trim();
         if(!vodaNum || vodaNum.length < 11 || !vodaNum.startsWith('01')){
-            toast('Please enter a valid Vodafone Cash number', 'error');
-            return;
-        }
-    }
-        // Instapay Validation
-    if(method === 'instapay'){
-        const instaAddr = document.getElementById('instaAddress').value.trim();
-        if(!instaAddr || instaAddr.length < 3){
-            toast('Please enter your InstaPay address', 'error');
-            return;
-        }
-    }
-
-        // Paypal Validation
-      if(method === 'paypal'){
-        const email = document.getElementById('paypalEmail').value.trim();
-        if(!email || !email.includes('@') || !email.includes('.')){
-          toast('Please enter a valid PayPal email address', 'error');
+          alert('Please enter a valid Vodafone Cash number.');
           return;
         }
-    }
+      }
+
+      // InstaPay Validation
+      if(activeMethod === 'instapay'){
+        const instaAddr = document.getElementById('instaAddress').value.trim();
+        if(!instaAddr || instaAddr.length < 3){
+          alert('Please enter your InstaPay address.');
+          return;
+        }
+      }
 
       const btn = document.getElementById('payBtn');
       btn.disabled = true;
-      btn.textContent = 'Processing...';
+      btn.textContent = 'Processing Payment...';
+      
       setTimeout(() => {
-        toast(`Payment successful via ${labels[method]}! Enjoy ${movie.title} 🎬`);
-        setTimeout(() => location.href = 'home.html', 1800);
-      }, 1200);
+        alert(`Payment successful! Your tickets for ${movieData.title} are confirmed.`);
+        location.href = 'home.html';
+      }, 1500);
     });
   }
 </script>

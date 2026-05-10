@@ -45,6 +45,16 @@
 
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
+
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+            margin-top: 0.3rem;
+        }
     </style>
 </head>
 <body class="cinema-bg">
@@ -87,12 +97,20 @@
                             <div class="form-grid">
                                 <label>Title<input name="title" required></label>
                                 <label>Duration (min)<input name="duration" type="number" required></label>
-                                <!-- FIXED: Name attribute matched to payload -->
                                 <label>Release Date<input name="releaseDate" type="date" required></label>
                                 <label>Poster URL<input name="imgUrl" type="url"></label>
                                 <label>Trailer URL<input name="trailerUrl" type="url"></label>
-                                <label>Category ID<input name="categoryId" type="number" value="1"></label>
-                                <label class="full-width">Status<input name="status" placeholder="Now Showing"></label>
+                                
+                                <!-- ROLLED BACK: Category ID input -->
+                                <label>Category ID<input name="categoryId" type="number" placeholder="Enter ID" required></label>
+                                
+                                <label class="full-width">Status
+                                    <select name="status" required>
+                                        <option value="SHOWING NOW">SHOWING NOW</option>
+                                        <option value="COMING SOON">COMING SOON</option>
+                                        <option value="ENDED">ENDED</option>
+                                    </select>
+                                </label>
                             </div>
                             <button type="submit" class="btn btn-hero">Save Movie</button>
                         </form>
@@ -121,13 +139,15 @@
                         <h3>Schedule Show</h3>
                         <form id="showtimeForm" onsubmit="addShowtime(event)">
                             <div class="form-grid">
-                                <!-- FIXED: select name changed to movieid to match entity -->
                                 <label>Movie<select name="movieid" id="showMovieSel" required></select></label>
+                                
+                                <!-- CINEMA SELECTION: Shows name, passes ID -->
+                                <label>Cinema<select name="cinemaId" id="showCinemaSel" required></select></label>
+                                
                                 <label>Date<input name="date" type="date" required></label>
                                 <label>Time<input name="time" type="time" required></label>
                                 <label>Hall ID<input name="hallId" type="number" value="1" required></label>
                                 <label>Price<input name="price" type="number" step="0.1" value="100" required></label>
-                                <input type="hidden" name="cinemaId" value="1">
                             </div>
                             <button type="submit" class="btn btn-hero">Add Showtime</button>
                         </form>
@@ -141,6 +161,7 @@
                                     <tr>
                                         <th>Show ID</th>
                                         <th>Movie ID</th>
+                                        <th>Cinema ID</th>
                                         <th>Date/Time</th>
                                         <th>Hall</th>
                                         <th style="text-align:right;">Actions</th>
@@ -157,6 +178,7 @@
 
     <script>
         const API_BASE = "http://localhost:8083";
+        const CINEMA_API = "http://localhost:8080/api/Cinemas"; // From admin-cinemas
 
         function getAuthHeader() {
             const token = sessionStorage.getItem('token');
@@ -164,6 +186,19 @@
                 'Authorization': `Bearer ${token}`, 
                 'Content-Type': 'application/json' 
             };
+        }
+
+        // FETCH CINEMAS: Name displayed, ID used as value
+        async function fetchCinemas() {
+            try {
+                const res = await fetch(CINEMA_API); 
+                if(res.ok) {
+                    const cinemas = await res.json();
+                    const sel = document.getElementById('showCinemaSel');
+                    sel.innerHTML = `<option value="">-- Select Cinema --</option>` + 
+                        cinemas.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                }
+            } catch (err) { console.error("Cinema fetch failed", err); }
         }
 
         async function fetchMovies() {
@@ -190,9 +225,7 @@
             
             tbody.innerHTML = movies.map(m => {
                 const mid = m.movieId || m.movieID || m.MovieID || m.id;
-                // FIXED: Checking multiple naming conventions for release date
-                const release = m.releaseDate || m.ReleaseDate || m.release_date || '—';
-                
+                const release = m.ReleaseDate || m.releaseDate || m.release_date || '—';
                 return `
                     <tr>
                         <td style="color:var(--gold); font-weight:bold;">${mid}</td>
@@ -205,21 +238,23 @@
                 `;
             }).join('');
 
-            sel.innerHTML = movies.map(m => {
-                const mid = m.movieId || m.movieID || m.MovieID || m.id;
-                return `<option value="${mid}">${m.title} (ID: ${mid})</option>`;
-            }).join('');
+            sel.innerHTML = `<option value="">-- Select Movie --</option>` + 
+                movies.map(m => {
+                    const mid = m.movieId || m.movieID || m.MovieID || m.id;
+                    return `<option value="${mid}">${m.title} (ID: ${mid})</option>`;
+                }).join('');
         }
 
         function renderShows(shows) {
             const tbody = document.getElementById('showtimesBody');
             tbody.innerHTML = shows.map(s => {
-                // FIXED: Fallback logic for movieid display
-                const mReferenceId = s.movieid || s.movieId || s.movieID || 'N/A';
+                const mReferenceId = s.movieId  || s.movieID || s.movieid || 'N/A';
+                const cReferenceId = s.cinemaId || s.cinemaID || s.CinemaID || s.cinema?.id || 'N/A';
                 return `
                 <tr>
                     <td style="color:var(--gold);">#${s.id}</td>
-                    <td>Movie ID: ${mReferenceId}</td>
+                    <td><b style="color:white;">${mReferenceId}</b></td>
+                    <td><b style="color:var(--gold);">${cReferenceId}</b></td>
                     <td>${s.date} @ ${s.time}</td>
                     <td>Hall ${s.hallId}</td>
                     <td style="text-align:right;">
@@ -231,14 +266,23 @@
 
         async function addMovie(e) {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const payload = Object.fromEntries(formData.entries());
-            
+            const f = new FormData(e.target);
+            const payload = {
+                title: f.get('title'),
+                duration: parseInt(f.get('duration')),
+                ReleaseDate: f.get('releaseDate')?.trim() || null, 
+                imgUrl: f.get('imgUrl'),
+                trailerUrl: f.get('trailerUrl'),
+                categoryId: parseInt(f.get('categoryId')), // Manual ID input
+                status: f.get('status')
+            };
+
             const res = await fetch(`${API_BASE}/movies`, {
                 method: 'POST',
                 headers: getAuthHeader(),
                 body: JSON.stringify(payload)
             });
+            
             if (res.ok) { 
                 e.target.reset(); 
                 fetchMovies(); 
@@ -250,10 +294,9 @@
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             
-            // FIXED: Ensuring movieid is extracted correctly from form and sent as integer
             const payload = {
-                movieid: parseInt(data.movieid), 
-                cinemaId: parseInt(data.cinemaId),
+                movieId: parseInt(data.movieid), 
+                cinemaId: parseInt(data.cinemaId), // Pulled from name selection value
                 hallId: parseInt(data.hallId),
                 price: parseFloat(data.price),
                 date: data.date,
@@ -266,14 +309,14 @@
                 headers: getAuthHeader(),
                 body: JSON.stringify(payload)
             });
+
             if (res.ok) { 
+                alert("Showtime added successfully!");
                 e.target.reset(); 
                 fetchShows(); 
-            } else {
-                alert("Failed to add showtime. Check console.");
             }
         }
-
+        
         async function deleteMovie(id) {
             if(!id || !confirm(`⚠️ Delete movie #${id}?`)) return;
             const res = await fetch(`${API_BASE}/movies/${id}`, { 
@@ -300,6 +343,8 @@
             });
         });
 
+        // Initialize data
+        fetchCinemas();
         fetchMovies();
         fetchShows();
 

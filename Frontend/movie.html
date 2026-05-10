@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Movie — EgyCinema</title>
+  <title>Movie Details — EgyCinema</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,66 +11,138 @@
 </head>
 <body>
   <div id="header-slot"></div>
-  <main style="flex:1" id="detailRoot"></main>
+  
+  <main style="flex:1" id="detailRoot">
+      <!-- Loading State -->
+      <div class="container" style="padding:10rem 0; text-align:center;">
+          <p style="color:var(--gold);">Fetching cinematic data...</p>
+      </div>
+  </main>
+
   <div id="footer-slot"></div>
 
   <script src="js/data.js"></script>
   <script src="js/common.js"></script>
   <script>
+    const API_CINEMA = "http://localhost:8080";    
+    const API_MOVIES_SHOWS = "http://localhost:8083"; 
+
     mountChrome();
-    const id = new URLSearchParams(location.search).get('id');
-    const m = getMovie(id);
-    const root = document.getElementById('detailRoot');
-    if(!m){
-      root.innerHTML = `
-        <div class="container" style="padding:5rem 1.5rem;text-align:center">
-          <h1 style="font-size:2rem;margin-bottom:.5rem">Movie not found</h1>
-          <a href="home.html" class="btn btn-hero" style="margin-top:1rem">Back to home</a>
-        </div>`;
-    }  else {
-  document.title = `${m.title} — EgyCinema`;
 
-  const cinemas = getCinemasForMovie(m.id);
+    async function loadMoviePage() {
+        const urlParams = new URLSearchParams(location.search);
+        const movieId = urlParams.get('id');
+        const root = document.getElementById('detailRoot');
 
-  root.innerHTML = `
-    <section class="detail-hero">
-      <div class="bg"><img src="${m.backdrop || m.poster}" alt="" /></div>
+        if (!movieId) {
+            showError("No movie ID provided.");
+            return;
+        }
 
-      <div class="container">
-        <a href="home.html" class="back-link">
-          <span class="icon">${ICONS.back}</span> Back
-        </a>
+        try {
+            // 1. Fetch Movie, Showtimes (8083) and Cinemas (8080)
+            const [resMovie, resShows, resCinemas] = await Promise.all([
+                fetch(`${API_MOVIES_SHOWS}/movies/${movieId}`).then(r => r.ok ? r.json() : null),
+                fetch(`${API_MOVIES_SHOWS}/showtimes/movie/${movieId}`).then(r => r.json()),
+                fetch(`${API_CINEMA}/api/Cinemas`).then(r => r.json())
+            ]);
 
-        <div class="detail-grid">
-          <img class="detail-poster scale-in" src="${m.poster}" alt="${m.title}" />
+            if (!resMovie) {
+                showError("Movie not found in database.");
+                return;
+            }
 
-          <div class="detail-info fade-in">
-            <div class="eyebrow">${m.genre}</div>
-            <h1>${m.title}</h1>
+            // 2. Data Normalization (Handling the Capital 'R' and Capital 'M')
+            const title = resMovie.title || "Untitled Movie";
+            const mId = resMovie.MovieID || resMovie.movieId || resMovie.id;
+            const release = resMovie.ReleaseDate || resMovie.releaseDate || '2026';
+            const year = release.toString().substring(0, 4);
 
-            <div class="detail-meta">
-              <span>${ICONS.clock}${m.duration}</span>
-              <span>${ICONS.cal}${m.year}</span>
-              <span><span class="star">${ICONS.star}</span>${m.rating}</span>
-            </div>
+            document.title = `${title} — EgyCinema`;
 
-            <p class="desc">${m.description}</p>
+            // 3. Map Showtimes to Cinemas
+            // We group the showtimes so we can show: Cinema Name -> List of Times
+            const groupedShows = resShows.reduce((acc, show) => {
+                const cinema = resCinemas.find(c => (c.id || c.cinemaId || c.CinemaID) == show.cinemaId);
+                const cinemaName = cinema ? cinema.name : "Partner Cinema";
+                
+                if (!acc[cinemaName]) acc[cinemaName] = [];
+                acc[cinemaName].push(show);
+                return acc;
+            }, {});
 
-            <div style="margin-top:1.25rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-              ${favButtonHTML(m.id, {size:'lg'})}
-              <span class="text-muted" style="font-size:.85rem">Add to your favorites</span>
-            </div>
+            // 4. Render the UI
+            root.innerHTML = `
+                <section class="detail-hero">
+                    <div class="bg"><img src="${resMovie.imgUrl || 'img/default-backdrop.jpg'}" alt="" /></div>
 
-            <div class="showing">
-              <h3>Now showing at</h3>
-              <div class="showing-grid" id="showingGrid"></div>
-            </div>
-  </div>
-      </div>
-    </section>
-  `;
-  loadShowtimes(m, cinemas);
-} 
+                    <div class="container">
+                        <a href="home.html" class="back-link">
+                            <span class="icon">${ICONS.back}</span> Back
+                        </a>
+
+                        <div class="detail-grid">
+                            <img class="detail-poster scale-in" src="${resMovie.imgUrl || 'img/default-poster.jpg'}" alt="${title}" />
+
+                            <div class="detail-info fade-in">
+                                <div class="eyebrow">${resMovie.status || 'Now Showing'}</div>
+                                <h1>${title}</h1>
+
+                                <div class="detail-meta">
+                                    <span>${ICONS.clock} ${resMovie.duration || 0} min</span>
+                                    <span>${ICONS.cal} ${year}</span>
+                                    <span><span class="star">${ICONS.star}</span> PG-13</span>
+                                </div>
+
+                                <p class="desc">Experience ${title} on the big screen. Check below for showtimes at your preferred cinema.</p>
+
+                                <div style="margin-top:1.25rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+                                    ${favButtonHTML(mId, {size:'lg'})}
+                                    <span class="text-muted" style="font-size:.85rem">Add to your favorites</span>
+                                </div>
+
+                                <div class="showing">
+                                    <h3>Showtimes at Egypt Cinemas</h3>
+                                    <div class="showing-list">
+                                        ${Object.keys(groupedShows).length > 0 
+                                            ? Object.keys(groupedShows).map(name => `
+                                                <div class="cinema-group" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                                                    <h4 style="color: var(--gold); margin-bottom: 0.5rem;">${name}</h4>
+                                                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                                                        ${groupedShows[name].map(s => `
+                                                            <button class="time-chip" onclick="bookTicket('${mId}', '${s.cinemaId}', '${s.date}', '${s.time}')">
+                                                                ${s.time.substring(0, 5)}
+                                                            </button>
+                                                        `).join('')}
+                                                    </div>
+                                                </div>
+                                            `).join('')
+                                            : `<p class="text-muted">No showtimes scheduled for this movie yet.</p>`
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+
+        } catch (err) {
+            console.error("Critical Load Error:", err);
+            showError("Failed to connect to backend services.");
+        }
+    }
+
+    function showError(msg) {
+        document.getElementById('detailRoot').innerHTML = `
+            <div class="container" style="padding:5rem 1.5rem;text-align:center">
+              <h1 style="font-size:2rem;margin-bottom:.5rem">${msg}</h1>
+              <a href="home.html" class="btn btn-hero" style="margin-top:1rem">Back to home</a>
+            </div>`;
+    }
+
+    // Run the loader
+    loadMoviePage();
   </script>
 </body>
 </html>
