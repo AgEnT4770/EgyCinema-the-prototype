@@ -13,6 +13,13 @@
         ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
         html { scroll-behavior: smooth; }
 
+        /* --- ADDED SCROLL LOGIC --- */
+        .admin-main {
+            height: 100vh;
+            overflow-y: auto;
+        }
+        /* -------------------------- */
+
         /* MOVIE CARD HOVER EFFECTS */
         .movie-card {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
@@ -65,25 +72,7 @@
         }
     </style>
 
-    <!-- Security Guard -->
-    <!-- <script>
-        (function protectAdminPage() {
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-                window.location.replace('staff-login.html');
-                return;
-            }
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                if (payload.role !== 'ROLE_ADMIN') {
-                    window.location.replace('employee-dashboard.html');
-                }
-            } catch (e) {
-                window.location.replace('staff-login.html');
-            }
-        })();
-    </script> -->
-</head>
+    </head>
 <body class="cinema-bg">
     <div class="admin-layout">
         <aside class="admin-sidebar">
@@ -105,13 +94,10 @@
         <main class="admin-main">
             <header class="admin-header">
                 <h2 class="text-gradient-gold">Movie Catalog</h2>
-                <!-- Link to your existing upload logic if needed, or kept as placeholder -->
-                <!-- <button class="btn btn-hero" onclick="location.href='admin-upload-movie.html'">Upload New Movie</button> -->
-            </header>
+                </header>
             
             <div class="admin-content">
                 <div id="movie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2rem;">
-                    <!-- Movie Cards will be injected here -->
                     <p style="color: var(--gold); text-align: center; grid-column: 1/-1;">Loading movies...</p>
                 </div>
             </div>
@@ -145,7 +131,7 @@
                     card.style.textAlign = 'center';
                     
                     // Match the case of MovieID based on your Java Entity
-                    const mId = movie.movieID || movie.MovieID;
+                    const mId = movie.movieId || movie.MovieID || movie.id;
 
                     card.innerHTML = `
                         <div class="poster-container">
@@ -155,9 +141,8 @@
                         <h4 style="margin-bottom: 0.5rem; font-size: 1.1rem; height: 2.4rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                             ${movie.title}
                         </h4>
-                        <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">${movie.duration} mins | ${movie.ReleaseDate || 'TBA'}</p>
+                        <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">${movie.duration} mins | ${movie.releaseDate || 'TBA'}</p>
                         <div style="display: flex; gap: 0.5rem;">
-                            <!-- Edit functionality disabled as requested, showing only Delete -->
                             <button class="btn btn-outline btn-sm" style="flex: 1; color: var(--primary); border-color: var(--primary);" onclick="deleteMovie(${mId})">
                                 Delete Permanently
                             </button>
@@ -189,10 +174,14 @@
 
         // Back to top logic
         const topBtn = document.getElementById("backToTop");
-        window.onscroll = () => {
-            topBtn.style.display = (window.pageYOffset > 400) ? "block" : "none";
+        const mainContent = document.querySelector('.admin-main');
+
+        // Since we moved scroll to .admin-main, we listen there
+        mainContent.onscroll = () => {
+            topBtn.style.display = (mainContent.scrollTop > 400) ? "block" : "none";
         };
-        topBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        topBtn.onclick = () => mainContent.scrollTo({ top: 0, behavior: 'smooth' });
 
         document.addEventListener('DOMContentLoaded', fetchMovies);
     </script>

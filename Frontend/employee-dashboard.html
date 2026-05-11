@@ -46,7 +46,7 @@
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        select {
+        select, input[type="file"] {
             width: 100%;
             padding: 0.8rem;
             background: #222;
@@ -54,6 +54,18 @@
             color: white;
             border-radius: 4px;
             margin-top: 0.3rem;
+        }
+
+        /* File input specific styling */
+        input[type="file"]::file-selector-button {
+            background: var(--gold);
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-right: 1rem;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -98,21 +110,21 @@
                                 <label>Title<input name="title" required></label>
                                 <label>Duration (min)<input name="duration" type="number" required></label>
                                 <label>Release Date<input name="releaseDate" type="date" required></label>
-                                <label>Poster URL<input name="imgUrl" type="url"></label>
-                                <label>Trailer URL<input name="trailerUrl" type="url"></label>
                                 
-                                <!-- ROLLED BACK: Category ID input -->
+                                <label>Poster Image<input type="file" name="posterFile" accept="image/png, image/jpeg" required></label>
+                                
+                                <label>Trailer URL<input name="trailerUrl" type="url"></label>
                                 <label>Category ID<input name="categoryId" type="number" placeholder="Enter ID" required></label>
                                 
                                 <label class="full-width">Status
                                     <select name="status" required>
-                                        <option value="SHOWING NOW">SHOWING NOW</option>
+                                        <option value="NOW SHOWING">NOW SHOWING</option>
                                         <option value="COMING SOON">COMING SOON</option>
                                         <option value="ENDED">ENDED</option>
                                     </select>
                                 </label>
                             </div>
-                            <button type="submit" class="btn btn-hero">Save Movie</button>
+                            <button type="submit" class="btn btn-hero" id="saveMovieBtn">Save Movie & Upload Poster</button>
                         </form>
                     </div>
 
@@ -141,7 +153,6 @@
                             <div class="form-grid">
                                 <label>Movie<select name="movieid" id="showMovieSel" required></select></label>
                                 
-                                <!-- CINEMA SELECTION: Shows name, passes ID -->
                                 <label>Cinema<select name="cinemaId" id="showCinemaSel" required></select></label>
                                 
                                 <label>Date<input name="date" type="date" required></label>
@@ -178,7 +189,7 @@
 
     <script>
         const API_BASE = "http://localhost:8083";
-        const CINEMA_API = "http://localhost:8080/api/Cinemas"; // From admin-cinemas
+        const CINEMA_API = "http://localhost:8080/api/Cinemas";
 
         function getAuthHeader() {
             const token = sessionStorage.getItem('token');
@@ -188,7 +199,6 @@
             };
         }
 
-        // FETCH CINEMAS: Name displayed, ID used as value
         async function fetchCinemas() {
             try {
                 const res = await fetch(CINEMA_API); 
@@ -264,28 +274,67 @@
             `}).join('');
         }
 
+        // --- UPDATED ADD MOVIE LOGIC (2 STEPS) ---
         async function addMovie(e) {
             e.preventDefault();
+            const btn = document.getElementById('saveMovieBtn');
+            btn.textContent = "Uploading... Please wait";
+            btn.disabled = true;
+
             const f = new FormData(e.target);
-            const payload = {
+            
+            // STEP 1: Create Movie object (without the file)
+            const moviePayload = {
                 title: f.get('title'),
                 duration: parseInt(f.get('duration')),
                 ReleaseDate: f.get('releaseDate')?.trim() || null, 
-                imgUrl: f.get('imgUrl'),
                 trailerUrl: f.get('trailerUrl'),
-                categoryId: parseInt(f.get('categoryId')), // Manual ID input
+                categoryId: parseInt(f.get('categoryId')),
                 status: f.get('status')
             };
 
-            const res = await fetch(`${API_BASE}/movies`, {
-                method: 'POST',
-                headers: getAuthHeader(),
-                body: JSON.stringify(payload)
-            });
-            
-            if (res.ok) { 
+            try {
+                // 1. Post Movie Details
+                const movieRes = await fetch(`${API_BASE}/movies`, {
+                    method: 'POST',
+                    headers: getAuthHeader(),
+                    body: JSON.stringify(moviePayload)
+                });
+
+                if (!movieRes.ok) throw new Error("Failed to save movie details");
+                
+                const createdMovie = await movieRes.json();
+                const newId = createdMovie.movieId || createdMovie.movieID || createdMovie.id;
+
+                // STEP 2: Upload File if one was selected
+                const fileInput = f.get('posterFile');
+                if (fileInput && fileInput.size > 0 && newId) {
+                    
+                    const fileData = new FormData();
+                    fileData.append('file', fileInput); // Must match Java @RequestParam("file")
+
+                    // Build Authorization header manually since Content-Type must NOT be application/json for files
+                    const token = sessionStorage.getItem('token');
+                    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+                    const uploadRes = await fetch(`${API_BASE}/movies/${newId}/upload-poster`, {
+                        method: 'POST',
+                        headers: headers, // Browser automatically sets Content-Type to multipart/form-data with boundary
+                        body: fileData
+                    });
+
+                    if (!uploadRes.ok) throw new Error("Movie saved, but S3 upload failed.");
+                }
+
+                alert("Movie and Poster uploaded successfully!");
                 e.target.reset(); 
                 fetchMovies(); 
+
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
+                btn.textContent = "Save Movie & Upload Poster";
+                btn.disabled = false;
             }
         }
 
@@ -296,7 +345,7 @@
             
             const payload = {
                 movieId: parseInt(data.movieid), 
-                cinemaId: parseInt(data.cinemaId), // Pulled from name selection value
+                cinemaId: parseInt(data.cinemaId),
                 hallId: parseInt(data.hallId),
                 price: parseFloat(data.price),
                 date: data.date,
