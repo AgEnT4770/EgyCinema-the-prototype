@@ -127,7 +127,7 @@
         <mxCell id="aX170SCUzU39y9s9u0BD-55" parent="aX170SCUzU39y9s9u0BD-53" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
           <mxGeometry height="8" width="270" y="50" as="geometry" />
         </mxCell>
-        <mxCell id="aX170SCUzU39y9s9u0BD-56" parent="aX170SCUzU39y9s9u0BD-53" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ BookingController(service : BookingService)&lt;br&gt;+ create(booking : Booking) : Booking            |&lt;br&gt;+ getAll() : List&amp;lt;Booking&amp;gt;" vertex="1">
+        <mxCell id="aX170SCUzU39y9s9u0BD-56" parent="aX170SCUzU39y9s9u0BD-53" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ BookingController(service : BookingService)&lt;br&gt;+ create(booking : Booking) : Booking&lt;br&gt;+ getAll() : List&amp;lt;Booking&amp;gt;" vertex="1">
           <mxGeometry height="52" width="270" y="58" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-60" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-29" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="aX170SCUzU39y9s9u0BD-28" value="Use">
@@ -613,7 +613,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="aX170SCUzU39y9s9u0BD-231" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" value="inv SeatsPositive: self.seats &amp;gt; 0" vertex="1">
+        <mxCell id="aX170SCUzU39y9s9u0BD-231" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv SeatsPositive: self.seats &amp;gt; 0" vertex="1">
           <mxGeometry height="60" width="190" x="-850" y="270" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-232" parent="aX170SCUzU39y9s9u0BD-231" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context Booking" vertex="1">
@@ -625,7 +625,7 @@
             <mxPoint x="-690" y="290" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="aX170SCUzU39y9s9u0BD-234" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" value="inv ValidMovie: self.movieId &amp;lt;&amp;gt; null" vertex="1">
+        <mxCell id="aX170SCUzU39y9s9u0BD-234" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv ValidMovie: self.movieId &amp;lt;&amp;gt; null" vertex="1">
           <mxGeometry height="60" width="200" x="-855" y="190" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-235" parent="aX170SCUzU39y9s9u0BD-234" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context Booking" vertex="1">
@@ -638,18 +638,18 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-239" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" value="inv PositiveAmount: self.amount &amp;gt; 0" vertex="1">
-          <mxGeometry height="50" width="200" x="-1440" y="200" as="geometry" />
+          <mxGeometry height="50" width="200" x="-1430" y="150" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-240" parent="aX170SCUzU39y9s9u0BD-239" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context Payment" vertex="1">
           <mxGeometry height="25" relative="1" width="200.00000000000003" as="geometry" />
         </mxCell>
-        <mxCell id="aX170SCUzU39y9s9u0BD-241" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv ValidMethod:&lt;br&gt;self.paymentMethod = &#39;VISA&#39; or&lt;br&gt;self.paymentMethod = &#39;Cash&#39; or&lt;br&gt;self.paymentMethod = &#39;MasterCard&#39;" vertex="1">
-          <mxGeometry height="95" width="200" x="-1440" y="280" as="geometry" />
+        <mxCell id="aX170SCUzU39y9s9u0BD-241" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv ValidMethod:&lt;br&gt;&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;self.paymentMethod = &#39;VISA&#39; or&lt;br&gt;self.paymentMethod = &#39;Cash&#39; or&lt;br&gt;self.paymentMethod = &#39;MasterCard&#39;&lt;/blockquote&gt;" vertex="1">
+          <mxGeometry height="95" width="250" x="-1480" y="335" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-242" parent="aX170SCUzU39y9s9u0BD-241" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context Payment" vertex="1">
-          <mxGeometry height="25" relative="1" width="200.00000000000003" as="geometry" />
+          <mxGeometry height="25" relative="1" width="250.00000000000003" as="geometry" />
         </mxCell>
-        <mxCell id="aX170SCUzU39y9s9u0BD-243" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-241" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.001;entryY=0.652;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0;exitDx=200;exitDy=25;exitPerimeter=0;" target="aX170SCUzU39y9s9u0BD-2" value="">
+        <mxCell id="aX170SCUzU39y9s9u0BD-243" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-242" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.001;entryY=0.652;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0;exitDx=0;exitDy=0;" target="aX170SCUzU39y9s9u0BD-2" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="-1360" y="500" as="sourcePoint" />
             <mxPoint x="-1310" y="450" as="targetPoint" />
@@ -661,7 +661,7 @@
             <mxPoint x="-1210" y="260" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="aX170SCUzU39y9s9u0BD-245" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv FutureShowtime:&lt;br&gt;self.dateTime &amp;gt; currentDateTime" vertex="1">
+        <mxCell id="aX170SCUzU39y9s9u0BD-245" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv FutureShowtime:&lt;br&gt;self.dateTime &amp;gt; DateTime::now()" vertex="1">
           <mxGeometry height="70" width="200" x="360" y="292.5" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-246" parent="aX170SCUzU39y9s9u0BD-245" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;fontStyle=0" value="context ShowTimeEntity" vertex="1">
@@ -686,19 +686,19 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-253" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv PositiveSeats: self.totalSeats &amp;gt; 0" vertex="1">
-          <mxGeometry height="60" width="205" x="1495" y="425" as="geometry" />
+          <mxGeometry height="60" width="205" x="1510" y="30" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-254" parent="aX170SCUzU39y9s9u0BD-253" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context Hall" vertex="1">
           <mxGeometry height="25" relative="1" width="204.99999999999997" as="geometry" />
         </mxCell>
-        <mxCell id="aX170SCUzU39y9s9u0BD-255" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-254" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=-0.015;entryY=0.756;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="aX170SCUzU39y9s9u0BD-134" value="">
+        <mxCell id="aX170SCUzU39y9s9u0BD-255" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-253" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=-0.015;entryY=0.756;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" target="aX170SCUzU39y9s9u0BD-134" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="1580" y="360" as="sourcePoint" />
             <mxPoint x="1630" y="310" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-256" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="inv UsernameNotEmpty:&lt;br&gt;self.username &amp;lt;&amp;gt; &#39;&#39;" vertex="1">
-          <mxGeometry height="70" width="150" x="1925" y="265" as="geometry" />
+          <mxGeometry height="70" width="150" x="1925" y="190" as="geometry" />
         </mxCell>
         <mxCell id="aX170SCUzU39y9s9u0BD-257" parent="aX170SCUzU39y9s9u0BD-256" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context User" vertex="1">
           <mxGeometry height="25" relative="1" width="150" as="geometry" />
@@ -707,6 +707,132 @@
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="2020" y="290" as="sourcePoint" />
             <mxPoint x="2110" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-259" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="AdminController" vertex="1">
+          <mxGeometry height="110" width="470" x="2500" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-260" parent="aX170SCUzU39y9s9u0BD-259" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- userRepository : UserRepository" vertex="1">
+          <mxGeometry height="24" width="470" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-261" parent="aX170SCUzU39y9s9u0BD-259" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
+          <mxGeometry height="8" width="470" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-262" parent="aX170SCUzU39y9s9u0BD-259" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ getAllUsers() : ResponseEntity&amp;lt;List&amp;lt;User&amp;gt;&amp;gt;&lt;div&gt;+&amp;nbsp;updateRole(username : String, body :&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Map&amp;lt;String,String&amp;gt;) : ResponseEntity&amp;lt;String&amp;gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;+ deleteUser(username : String) : ResponseEntity&amp;lt;String&amp;gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="470" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-263" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-262" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fontSize=15;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="aX170SCUzU39y9s9u0BD-150" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="2410" y="550" as="sourcePoint" />
+            <mxPoint x="2410" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-265" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="S3Service " vertex="1">
+          <mxGeometry height="110" width="320" x="2920" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-266" parent="aX170SCUzU39y9s9u0BD-265" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- s3Client : S3Client&lt;br&gt;- bucketName : String" vertex="1">
+          <mxGeometry height="44" width="320" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-267" parent="aX170SCUzU39y9s9u0BD-265" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
+          <mxGeometry height="8" width="320" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-268" parent="aX170SCUzU39y9s9u0BD-265" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ uploadFile(file : MultipartFile) : String" vertex="1">
+          <mxGeometry height="32" width="320" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-269" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="SecurityConfig" vertex="1">
+          <mxGeometry height="90" width="350" x="2070" y="1100" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-270" parent="aX170SCUzU39y9s9u0BD-269" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- jwtAuth : JwtAuth" vertex="1">
+          <mxGeometry height="24" width="350" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-271" parent="aX170SCUzU39y9s9u0BD-269" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
+          <mxGeometry height="8" width="350" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-272" parent="aX170SCUzU39y9s9u0BD-269" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ securityFilterChain(http : HttpSecurity) : SecurityFilterChain" vertex="1">
+          <mxGeometry height="32" width="350" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-273" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-272" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fontSize=15;entryX=1;entryY=0;entryDx=0;entryDy=0;" target="aX170SCUzU39y9s9u0BD-172" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="2030" y="1060" as="sourcePoint" />
+            <mxPoint x="2030" y="970" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-274" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-269" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;exitX=0;exitY=0;exitDx=0;exitDy=0;fontSize=15;entryX=1;entryY=0;entryDx=0;entryDy=0;" target="aX170SCUzU39y9s9u0BD-166" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="2094" y="1330" as="sourcePoint" />
+            <mxPoint x="2094" y="1240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-474" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;inv ValidStatus:&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; self.status = &#39;PAID&#39; or&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; self.status = &#39;PENDING&#39; or&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; self.status = &#39;FAILED&#39;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="200" x="-1440" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-475" parent="aX170SCUzU39y9s9u0BD-474" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context Payment" vertex="1">
+          <mxGeometry height="25" relative="1" width="200.00000000000003" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-477" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-474" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0;exitDx=200;exitDy=57.5;exitPerimeter=0;" target="aX170SCUzU39y9s9u0BD-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="-1490" y="410" as="sourcePoint" />
+            <mxPoint x="-1440" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-478" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;inv CinemaAssigned:&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;self.cinema &amp;lt;&amp;gt; null&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="230" x="1520" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-479" parent="aX170SCUzU39y9s9u0BD-478" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context Hall" vertex="1">
+          <mxGeometry height="25" relative="1" width="230" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-481" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-479" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0;entryY=0.914;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="aX170SCUzU39y9s9u0BD-134" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1520" y="390" as="sourcePoint" />
+            <mxPoint x="1570" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-482" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;inv PasswordHashExists:&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; self.passwordHash &amp;lt;&amp;gt; &#39;&#39;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="150" x="1940" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-483" parent="aX170SCUzU39y9s9u0BD-482" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context User" vertex="1">
+          <mxGeometry height="25" relative="1" width="150" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-484" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-482" style="endArrow=none;dashed=1;html=1;rounded=0;exitX=0;exitY=0;exitDx=150;exitDy=25;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" target="aX170SCUzU39y9s9u0BD-145" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="2075.96" y="250" as="sourcePoint" />
+            <mxPoint x="2129.96" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-485" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;pre:&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; payment.amount &amp;gt; 0 and&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; payment.bookingId &amp;gt; 0&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;post:&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; result.status = &#39;PAID&#39; and&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; result.transactionId &amp;lt;&amp;gt; &#39;&#39; and&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; result.createdAt &amp;lt;&amp;gt; null&lt;/div&gt;" vertex="1">
+          <mxGeometry height="165" width="390" x="-1690" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-486" parent="aX170SCUzU39y9s9u0BD-485" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context PaymentService::createPayment(payment : Payment)&#xa;" vertex="1">
+          <mxGeometry height="35" relative="1" width="390" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-487" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-485" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0;exitDx=390;exitDy=95;exitPerimeter=0;" target="aX170SCUzU39y9s9u0BD-12" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="-1450" y="1170" as="sourcePoint" />
+            <mxPoint x="-1400" y="1120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-488" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="pre:&lt;br&gt;&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;    booking.userId &amp;gt; 0 and&lt;br&gt;    booking.movieId &amp;gt; 0 and&lt;br&gt;    booking.showtimeId &amp;gt; 0 and&lt;br&gt;    booking.seats &amp;gt; 0&lt;/blockquote&gt;&lt;br&gt;post:&lt;br&gt;&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;    result.id &amp;lt;&amp;gt; null and&lt;br&gt;    result.bookingDate &amp;lt;&amp;gt; null&lt;/blockquote&gt;" vertex="1">
+          <mxGeometry height="165" width="390" x="-1010" y="1150" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-489" parent="aX170SCUzU39y9s9u0BD-488" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context BookingService::createBooking(booking : Booking)&#xa;" vertex="1">
+          <mxGeometry height="35" relative="1" width="390" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-490" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-489" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="aX170SCUzU39y9s9u0BD-44" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="-760" y="1110" as="sourcePoint" />
+            <mxPoint x="-710" y="1060" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-492" parent="1" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=left;" value="pre:&lt;br&gt;&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;    username &amp;lt;&amp;gt; &#39;&#39; and&lt;br&gt;    password &amp;lt;&amp;gt; &#39;&#39;&lt;/blockquote&gt;&lt;br&gt;post:&lt;br&gt;&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;    result = true implies&lt;br&gt;    User.allInstances()-&amp;gt;exists(u | u.username = username)&lt;/blockquote&gt;" vertex="1">
+          <mxGeometry height="142.5" width="430" x="2570" y="907.5" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-493" parent="aX170SCUzU39y9s9u0BD-492" style="resizeWidth=1;part=1;strokeColor=none;fillColor=none;align=left;spacingLeft=5;" value="context AuthService::registerUser(username : String, password : String)&#xa;" vertex="1">
+          <mxGeometry height="35" relative="1" width="430.00000000000006" as="geometry" />
+        </mxCell>
+        <mxCell id="aX170SCUzU39y9s9u0BD-497" edge="1" parent="1" source="aX170SCUzU39y9s9u0BD-155" style="endArrow=none;dashed=1;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" target="aX170SCUzU39y9s9u0BD-493" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="2400" y="960" as="sourcePoint" />
+            <mxPoint x="2450" y="910" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
