@@ -14,6 +14,7 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/movies")
 public class UploadController {
 

@@ -26,10 +26,12 @@
   <script src="js/common.js"></script>
   <script>
     mountChrome();
-    function render(){
+
+    async function render() {
       const ids = Favs.all();
       const list = document.getElementById('favList');
-      if(ids.length === 0){
+
+      if (ids.length === 0) {
         list.innerHTML = `
           <div style="text-align:center;padding:3rem 1rem;color:var(--muted)">
             <div style="font-size:3rem;margin-bottom:1rem">★</div>
@@ -38,28 +40,51 @@
           </div>`;
         return;
       }
-      list.innerHTML = `<div class="fav-grid">${ids.map(id => {
-        const m = getMovie(id); if(!m) return '';
-        return `
+
+      try {
+        // Fetch real data from your AWS backend
+        const res = await fetch('http://100.49.29.15:8080/api/movies');
+        const allMovies = await res.json();
+
+        // Filter movies based on the IDs saved in localStorage
+        const favMovies = allMovies.filter(m => ids.includes(String(m.id)) || ids.includes(m.id));
+
+        if (favMovies.length === 0) {
+           list.innerHTML = `<p style="text-align:center;color:var(--muted)">Saved movies not found.</p>`;
+           return;
+        }
+
+        list.innerHTML = `<div class="fav-grid">${favMovies.map(m => `
           <div class="movie-card" style="width:auto">
             <a href="movie.html?id=${m.id}" style="display:block">
               <div class="poster">
-                <span class="rating">${m.rating}</span>
+                <span class="rating">${m.rating || 'N/A'}</span>
                 ${favButtonHTML(m.id)}
-                <img src="${m.poster}" alt="${m.title} poster" loading="lazy" />
+                <img src="${m.poster || m.posterUrl}" alt="${m.title} poster" loading="lazy" />
               </div>
               <h3>${m.title}</h3>
               <div class="movie-meta">
-                <span>${ICONS.clock}${m.duration}</span>
-                <span><span class="star">${ICONS.star}</span>${m.year}</span>
+                <span>${ICONS.clock}${m.duration || ''}</span>
+                <span><span class="star">${ICONS.star}</span>${m.year || ''}</span>
               </div>
             </a>
-          </div>`;
-      }).join('')}</div>`;
+          </div>`).join('')}</div>`;
+
+      } catch (err) {
+        console.error("Fetch error:", err);
+        list.innerHTML = `<p style="text-align:center;color:red">Error connecting to the movie service.</p>`;
+      }
     }
+
+    // Initialize the page
     render();
-    // Re-render when favorites change (so removed cards disappear)
-    document.addEventListener('click', (e) => { if(e.target.closest('[data-fav]')) setTimeout(render, 0); });
-  </script>
+
+    // Re-render when a star is clicked
+    document.addEventListener('click', (e) => { 
+      if (e.target.closest('[data-fav]')) {
+        setTimeout(render, 50); 
+      } 
+    });
+</script>
 </body>
 </html>

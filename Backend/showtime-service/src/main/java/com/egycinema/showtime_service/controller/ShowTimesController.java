@@ -12,6 +12,7 @@ import java.util.Map;
 
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/showtimes")
 public class ShowTimesController {
     @Autowired

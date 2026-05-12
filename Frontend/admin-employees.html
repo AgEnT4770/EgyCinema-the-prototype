@@ -68,7 +68,7 @@
             const currentUser = payload.sub;
             
             try {
-                const res = await fetch('http://localhost:8080/api/admin/users', {
+                const res = await fetch('http://100.49.29.15:8080/api/admin/users', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 
@@ -111,14 +111,14 @@
 
         async function promoteUser(username) {
             const token = sessionStorage.getItem('token');
-            const users = await (await fetch('http://localhost:8080/api/admin/users', {
+            const users = await (await fetch('http://100.49.29.15:8080/api/admin/users', {
                 headers: { 'Authorization': 'Bearer ' + token }
             })).json();
             
             const user = users.find(u => u.username === username);
             const newRole = user.role === 'ROLE_ADMIN' ? 'ROLE_USER' : 'ROLE_ADMIN';
             
-            const res = await fetch(`http://localhost:8080/api/admin/users/${username}/role`, {
+            const res = await fetch(`http://100.49.29.15:8080/api/admin/users/${username}/role`, {
                 method: 'PUT',
                 headers: { 
                     'Authorization': 'Bearer ' + token,
@@ -139,7 +139,7 @@
             if (!confirm(`Are you sure you want to delete ${username}?`)) return;
             
             const token = sessionStorage.getItem('token');
-            const res = await fetch(`http://localhost:8080/api/admin/users/${username}`, {
+            const res = await fetch(`http://100.49.29.15:8080/api/admin/users/${username}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.service.AuthService;
 
-@CrossOrigin(origins = "http://localhost:5500", allowedHeaders = "*") 
+@CrossOrigin(origins = "*", allowedHeaders = "*") 
 @RestController
 @RequestMapping("/api/auth")
 // Allows the frontend to access the API from any origin

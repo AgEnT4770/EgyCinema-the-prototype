@@ -30,7 +30,7 @@ const Auth = {
   },
   
   async signup(username, password){
-    const res = await fetch('http://localhost:8080/api/auth/register', {
+    const res = await fetch('http://100.49.29.15:8080/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -46,7 +46,7 @@ const Auth = {
 
 async login(username, password){
     try {
-        const res = await fetch('http://localhost:8080/api/auth/login', {
+        const res = await fetch('http://100.49.29.15:8080/api/auth/login', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const Favs = {
 // --- Showtimes (deterministic per movie+cinema) ---
 async function fetchShowtimes(movieId, cinemaId) {
   const res = await fetch(
-    `http://localhost:8080/showtimes/movie/${movieId}/cinema/${cinemaId}`
+    `http://100.49.29.15:8080/showtimes/movie/${movieId}/cinema/${cinemaId}`
   );
 
   if (!res.ok) {
@@ -264,7 +264,7 @@ document.addEventListener('click', (e) => {
 });
 // Add this new function to common.js
 async function executeBooking(bookingData) {
-    const API_BOOKING = "http://localhost:8082/bookings";
+    const API_BOOKING = "http://100.49.29.15:8082/bookings";
     
     try {
         const response = await fetch(API_BOOKING, {
